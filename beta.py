@@ -4,6 +4,10 @@ from __future__ import division, print_function
 
 import os, sys, inspect, tty, termios, time, cPickle
 
+from dotenv import load_dotenv
+dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
+load_dotenv(dotenv_path)
+
 src_dir = os.path.dirname(inspect.getfile(inspect.currentframe()))
 lib_dir = os.path.abspath(os.path.join(src_dir, os.environ.get("LEAP_SDK_LOCATION")))
 sys.path.insert(0, lib_dir)
@@ -13,10 +17,6 @@ from numpy.random import choice as npchoice
 from collections import deque
 import serial
 import struct
-from dotenv import load_dotenv
-
-dotenv_path = join(dirname(__file__), '.env')
-load_dotenv(dotenv_path)
 
 MEMORY = 5
 INITIAL_WEIGHT = 1
