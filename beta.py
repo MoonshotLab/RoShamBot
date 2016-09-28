@@ -3,8 +3,7 @@
 from __future__ import division
 
 from numpy.random import choice as npchoice
-import cPickle
-import sys, tty, termios
+import sys, tty, termios, time, cPickle
 from collections import deque
 import serial
 import struct
@@ -171,12 +170,19 @@ def main():
     history = deque()
     char_map = {'left': 'r', 'up': 'p', 'right': 's'}
 
-    print '=================================================================================='
-    print ' Welcome to Roshambot 3000                                                        '
-    print ' Use the arrow keys to play.                                                      '
-    print ' Press Left for ROCK, Up for PAPER, Right for SCISSORS, and Down to end the game. '
-    print '=================================================================================='
+    print '=========================================================================='
+    print ' Welcome to Roshambot 3000                                                '
+    print ' Use the arrow keys to play.                                              '
+    print ' Press Left for ROCK, Up for PAPER, Right for SCISSORS, and Down to quit. '
+    print '=========================================================================='
     print
+
+    time.sleep(0.5)
+
+    print "We'll play best of %d" % ROUNDS_TO_WIN
+    print "Press any key to begin..."
+
+    char = get_char()
 
     game = {}
     for key in ['turn', 'win', 'tie', 'loss']:
@@ -210,6 +216,10 @@ def main():
 
         guess = get_guess(history, M)
         our_play = BEATS[guess]
+
+        for i in range(3, 0, -1):
+            print i
+            time.sleep(0.9)
 
         char = get_char()
         print "I'm guessing you'll play %s so I play %s" % (FULL_PLAY[guess].upper(), FULL_PLAY[our_play].upper())
@@ -247,6 +257,7 @@ def main():
             history.pop()
 
         print
+        time.sleep(2)
 
 
     # pickle graph
