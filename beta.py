@@ -16,18 +16,45 @@ import serial
 import struct
 
 MEMORY = 5
+INITIAL_WEIGHT = 1
+ROUNDS_TO_WIN = 5
 
 LOAD_FRESH = True
+CONNECT_TO_ARDUINO = True
 
 PICKLE_FILE = 'model_list.pk'
 
 ROOT = '0'
 CHOICES = ['r', 'p', 's']
-INITIAL_WEIGHT = 1
 BEATS = {'r': 'p', 'p': 's', 's': 'r'}
 FULL_PLAY = {'r': 'rock', 'p': 'paper', 's': 'scissors'}
 INT_PLAY = {'r': 0, 'p': 1, 's': 2}
-ROUNDS_TO_WIN = 5
+
+ASCII_ART = {
+    'r':"""
+    _______
+---'   ____)
+      (_____)
+      (_____)
+      (____)
+---.__(___)""",
+    'p':"""
+    _______
+---'   ____)____
+          ______)
+          _______)
+         _______)
+---.__________)""",
+    's':"""
+    _______
+---'   ____)____
+          ______)
+       __________)
+      (____)
+---.__(___)"""
+}
+
+DIVIDER = "=" * 80
 
 class SampleListener(Leap.Listener):
     def getMove(self, controller):
@@ -147,14 +174,23 @@ def get_game_result(p1, p2):
 
     return -1
 
+
+def print_divider():
+    print()
+    print(DIVIDER)
+    print()
+
 def main():
     try:
-
-        # try:
-        #     bot = serial.Serial('/dev/cu.usbmodem1411', 9600, timeout=1)
-        # except:
-        #     print('Could not connect to Arduino.')
-        #     return
+        if CONNECT_TO_ARDUINO:
+            try:
+                bot = serial.Serial('/dev/cu.usbmodem1411', 9600, timeout=1)
+                bot_connected = True
+            except:
+                print('Could not connect to Arduino.')
+                bot_connected = False
+        else:
+            bot_connected = False
 
         try:
             listener = SampleListener()
@@ -177,24 +213,126 @@ def main():
         history = deque()
         char_map = {'left': 'r', 'up': 'p', 'right': 's'}
 
-        print('Welcome to Roshambot 3000')
-        # time.sleep(0.5)
-        print("We'll play best of %d" % ROUNDS_TO_WIN)
-        # time.sleep(0.5)
+        game = {}
+        for key in ['win', 'tie', 'loss']:
+            game[key] = 0
+        game['turn'] = 1
+
+        print(DIVIDER)
         print()
+        print('Welcome to Roshambot 3000')
+        print("We'll play best of %d" % ROUNDS_TO_WIN)
+        print_divider()
+
         time.sleep(0.5)
 
-        raw_input("Press Enter to continue...")
 
-        # char = get_char()
+        """
+        WAIT TO BEGIN
+        """
+        print ('Hold your hand over the screen to begin...')
+        ready_frame_count = 0
+        while True:
+            if ready_frame_count >= 10:
+                break
 
-        game = {}
-        for key in ['turn', 'win', 'tie', 'loss']:
-            game[key] = 0
+            frame = controller.frame()
 
+            if len(frame.hands) > 0:
+                ready_frame_count += 1
+                time.sleep(0.05)
+
+        time.sleep(0.5)
+
+
+        """
+        TUTORIAL
+        """
+        print()
+        print("Let's run through a tutorial.")
+        time.sleep(0.5)
+        print("Hold your hand over the input device to play.")
+        time.sleep(0.5)
+        print("We'll count down from 3, and on 'THROW', play your move.")
+        time.sleep(0.5)
+
+        print ('Hold your hand over the screen when ready...')
+        print()
+        ready_frame_count = 0
+        while True:
+            if ready_frame_count >= 5:
+                break
+
+            frame = controller.frame()
+
+            if len(frame.hands) > 0:
+                ready_frame_count += 1
+                time.sleep(0.05)
+
+
+        for choice in CHOICES:
+            correct_plays = 0
+            print("Let's practice throwing " + FULL_PLAY[choice])
+            time.sleep(1)
+            while True:
+                if correct_plays >= 3:
+                    break
+
+                print("On 3, throw " + FULL_PLAY[choice])
+
+                for i in range(3, 0, -1):
+                    print(str(i) + '... ')
+                    time.sleep(0.9)
+                print('THROW')
+
+                # use a move dict to get an average to make sure we're reading the input correctly
+                move_history = {} # reset dict
+                for i in range(20):
+                    move = listener.getMove(controller)
+                    if move:
+                        if move in move_history:
+                            move_history[move] += 1
+                        else:
+                            move_history[move] = 1
+
+                if not len(move_history):
+                    print("Could not read input, let's again...")
+                    print()
+                    time.sleep(1)
+                    continue
+
+                their_play = dict_max(move_history)
+
+                if their_play == choice:
+                    correct_plays += 1
+                    print('Great!')
+                else:
+                    print("Sorry, I thought you played " + FULL_PLAY[their_play] + ". Let's try again.")
+                print()
+                time.sleep(1)
+
+
+        print("Perfect! Let's begin...")
+        print ('Hold your hand over the screen when ready...')
+        ready_frame_count = 0
+        while True:
+            if ready_frame_count >= 5:
+                break
+
+            frame = controller.frame()
+
+            if len(frame.hands) > 0:
+                ready_frame_count += 1
+                time.sleep(0.05)
+
+        time.sleep(2)
+
+
+        """
+        LET'S PLAY
+        """
         while True:
 
-            game['turn'] += 1
             # traverse history, updating weights
             len_history = len(history)
             nodes = list(history)
@@ -218,14 +356,14 @@ def main():
 
                 nodes.pop()
 
-
+            print_divider()
             guess = get_guess(history, M)
             our_play = BEATS[guess]
 
             for i in range(3, 0, -1):
                 print(str(i) + '... ')
                 time.sleep(0.9)
-            print()
+            print('THROW')
 
             # use a move dict to get an average to make sure we're reading the input correctly
             move_history = {} # reset dict
@@ -239,16 +377,23 @@ def main():
 
             if not len(move_history):
                 print('Could not read input, trying again...')
+                print_divider()
                 time.sleep(2)
+                print()
                 continue
-            else:
-                their_play = dict_max(move_history)
-                # print(their_play)
-                # print(move_history)
+
+
+            their_play = dict_max(move_history)
+            # print(their_play)
+            # print(move_history)
 
 
             print("I guessed you'd play %s so I'll play %s" % (FULL_PLAY[guess].upper(), FULL_PLAY[our_play].upper()))
-            # bot.write(struct.pack('>B', INT_PLAY[our_play]))
+            print(ASCII_ART[our_play])
+            print()
+
+            if bot_connected:
+                bot.write(struct.pack('>B', INT_PLAY[our_play]))
 
             game_result = get_game_result(our_play, their_play)
 
@@ -263,13 +408,16 @@ def main():
                 print('I win!')
                 game['win'] += 1
 
-            print()
+            print_divider()
+
             if game['loss'] >= ROUNDS_TO_WIN or game['win'] >= ROUNDS_TO_WIN:
+                print_divider()
                 print("You won %.2f%% (%d / %d)" % (game['loss'] / game['turn'] * 100, game['loss'], game['turn']))
                 print("We tied %.2f%% (%d / %d)" % (game['tie'] / game['turn'] * 100, game['tie'], game['turn']))
                 print("You lost %.2f%% (%d / %d)" % (game['win'] / game['turn'] * 100, game['win'], game['turn']))
-                for model_level in M:
-                    print(model_level)
+                print_divider()
+                # for model_level in M:
+                #     print(model_level)
                 break
 
             history.appendleft(their_play)
@@ -277,15 +425,22 @@ def main():
             while len(history) > MEMORY:
                 history.pop()
 
+            game['turn'] += 1
             time.sleep(2)
             print()
 
     except:
-        print("You won %.2f%% (%d / %d)" % (game['loss'] / game['turn'] * 100, game['loss'], game['turn']))
-        print("We tied %.2f%% (%d / %d)" % (game['tie'] / game['turn'] * 100, game['tie'], game['turn']))
-        print("You lost %.2f%% (%d / %d)" % (game['win'] / game['turn'] * 100, game['win'], game['turn']))
+        print_divider()
+        if game['turn'] > 1:
+            print("You won %.2f%% (%d / %d)" % (game['loss'] / game['turn'] * 100, game['loss'], game['turn']))
+            print("We tied %.2f%% (%d / %d)" % (game['tie'] / game['turn'] * 100, game['tie'], game['turn']))
+            print("You lost %.2f%% (%d / %d)" % (game['win'] / game['turn'] * 100, game['win'], game['turn']))
+        print("Thanks for playing!")
+        print_divider()
 
     finally:
+        controller.remove_listener(listener)
+
         # pickle graph
         cPickle.dump(M, open(PICKLE_FILE, 'wb'))
 
