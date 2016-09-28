@@ -21,6 +21,7 @@ INITIAL_WEIGHT = 1
 BEATS = {'r': 'p', 'p': 's', 's': 'r'}
 FULL_PLAY = {'r': 'rock', 'p': 'paper', 's': 'scissors'}
 INT_PLAY = {'r': 0, 'p': 1, 's': 2}
+ROUNDS_TO_WIN = 5
 
 class Getch:
     def __call__(self):
@@ -152,11 +153,11 @@ def get_game_result(p1, p2):
     return -1
 
 def main():
-    try:
-        bot = serial.Serial('/dev/cu.usbmodem1411', 9600, timeout=1)
-    except:
-        print 'Could not connect to Arduino.'
-        return
+    # try:
+    #     bot = serial.Serial('/dev/cu.usbmodem1411', 9600, timeout=1)
+    # except:
+    #     print 'Could not connect to Arduino.'
+    #     return
 
     if LOAD_FRESH:
         M = []
@@ -212,7 +213,7 @@ def main():
 
         char = get_char()
         print "I'm guessing you'll play %s so I play %s" % (FULL_PLAY[guess].upper(), FULL_PLAY[our_play].upper())
-        bot.write(struct.pack('>B', INT_PLAY[our_play]))
+        # bot.write(struct.pack('>B', INT_PLAY[our_play]))
 
         if char == "down" or char == False:
             break
@@ -234,6 +235,11 @@ def main():
         print "You've won %.2f%% (%d / %d)" % (game['loss'] / game['turn'] * 100, game['loss'], game['turn'])
         print "We've tied %.2f%% (%d / %d)" % (game['tie'] / game['turn'] * 100, game['tie'], game['turn'])
         print "You've lost %.2f%% (%d / %d)" % (game['win'] / game['turn'] * 100, game['win'], game['turn'])
+
+        if game['loss'] >= ROUNDS_TO_WIN or game['win'] >= ROUNDS_TO_WIN:
+            for model_level in M:
+                print model_level
+            break
 
         history.appendleft(their_play)
 
