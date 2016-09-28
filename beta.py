@@ -71,12 +71,7 @@ def concat_row(lst):
 
     return return_string
 
-def get_guess1(model_level):
-    for play in model_level:
-        print play, model_level[play]
-
 def get_guess(history, model):
-    # print 'coming up with guess...'
     # initialize best guess dict
     guess_dict = {}
     for choice in CHOICES:
@@ -84,17 +79,23 @@ def get_guess(history, model):
 
     lhistory = list(history)
     # print lhistory
+    # print model
 
     for query_level in range(len(lhistory) + 1):
         if query_level >= len(model): break
 
         query = get_concatted_history(lhistory, query_level)
-        # print query
+        # print 'query: ', query
+
         plays = get_possible_plays(query, model)
+        # print 'plays: ', plays
         for play in plays:
             guess_dict[play] += plays[play] * (query_level + 1)
+            # print play, guess_dict[play]
 
+    # print guess_dict
     guess = dict_max(guess_dict)
+    # print guess
     return guess
 
 def get_possible_plays(query, model):
@@ -194,10 +195,13 @@ def main():
             # print nodes
             depth = len(nodes) - 1 # 1-based -> 0-based
             concatted_row = concat_row(nodes)
+            concatted_row = concatted_row[::-1] # look backwards in history for most likely next play
 
             if concatted_row in M[depth]:
+                # print 'incrementing: ', concatted_row, ' to a val of ', M[depth][concatted_row]
                 M[depth][concatted_row] += 1
             else:
+                # print 'adding: ', concatted_row
                 M[depth][concatted_row] = 1
 
             nodes.pop()
@@ -227,9 +231,9 @@ def main():
             print 'I win!'
             game['win'] += 1
 
-        print "You've won %f (%d / %d)" % (game['loss'] / game['turn'], game['loss'], game['turn'])
-        print "We've tied %f (%d / %d)" % (game['tie'] / game['turn'], game['tie'], game['turn'])
-        print "You've lost %f (%d / %d)" % (game['win'] / game['turn'], game['win'], game['turn'])
+        print "You've won %.2f%% (%d / %d)" % (game['loss'] / game['turn'] * 100, game['loss'], game['turn'])
+        print "We've tied %.2f%% (%d / %d)" % (game['tie'] / game['turn'] * 100, game['tie'], game['turn'])
+        print "You've lost %.2f%% (%d / %d)" % (game['win'] / game['turn'] * 100, game['win'], game['turn'])
 
         history.appendleft(their_play)
 
