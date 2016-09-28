@@ -21,6 +21,7 @@ ROUNDS_TO_WIN = 5
 
 LOAD_FRESH = True
 CONNECT_TO_ARDUINO = True
+LEAP_CONTROL = False
 
 PICKLE_FILE = 'model_list.pk'
 
@@ -29,6 +30,7 @@ CHOICES = ['r', 'p', 's']
 BEATS = {'r': 'p', 'p': 's', 's': 'r'}
 FULL_PLAY = {'r': 'rock', 'p': 'paper', 's': 'scissors'}
 INT_PLAY = {'r': 0, 'p': 1, 's': 2}
+DIVIDER = "=" * 80
 
 ASCII_ART = {
     'r':"""
@@ -54,7 +56,42 @@ ASCII_ART = {
 ---.__(___)"""
 }
 
-DIVIDER = "=" * 80
+class Getch:
+    def __call__(self):
+        fd = sys.stdin.fileno()
+        old_settings = termios.tcgetattr(fd)
+        try:
+            tty.setraw(sys.stdin.fileno())
+            ch = sys.stdin.read(3)
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+        return ch
+
+# get char from stdin
+def get_char():
+    inkey = Getch()
+    while(1):
+        k=inkey()
+        if k!='':break
+
+    # up
+    if k=='\x1b[A':
+        return "up"
+
+    # down
+    elif k=='\x1b[B':
+        return "down"
+
+    # right
+    elif k=='\x1b[C':
+        return "right"
+
+    # left
+    elif k=='\x1b[D':
+        return "left"
+
+    else:
+        return False
 
 class SampleListener(Leap.Listener):
     def getMove(self, controller):
@@ -140,7 +177,9 @@ def get_concatted_history(history, depth):
     else:
         return concat_row(history[0:depth])
 
-
+def maybe_sleep(duration):
+    if LEAP_CONTROL:
+        time.sleep(duration)
 
 def dict_max(dict):
     best, best_val = '', 0
@@ -192,13 +231,17 @@ def main():
         else:
             bot_connected = False
 
-        try:
-            listener = SampleListener()
-            controller = Leap.Controller()
-            controller.add_listener(listener)
-        except:
-            print('Could not connect to Leap controller.')
-            return
+        if LEAP_CONTROL:
+            try:
+                listener = SampleListener()
+                controller = Leap.Controller()
+                controller.add_listener(listener)
+                leap_connected = True
+            except:
+                print('Could not connect to Leap controller.')
+                leap_connected = False
+        else:
+            leap_connected = False
 
         if LOAD_FRESH:
             M = []
@@ -224,108 +267,115 @@ def main():
         print("We'll play best of %d" % ROUNDS_TO_WIN)
         print_divider()
 
-        time.sleep(0.5)
+        maybe_sleep(0.5)
 
 
         """
         WAIT TO BEGIN
         """
-        print ('Hold your hand over the screen to begin...')
-        ready_frame_count = 0
-        while True:
-            if ready_frame_count >= 10:
-                break
+        if leap_connected:
+            print ('Hold your hand over the screen to begin...')
+            ready_frame_count = 0
+            while True:
+                if ready_frame_count >= 10:
+                    break
 
-            frame = controller.frame()
+                frame = controller.frame()
 
-            if len(frame.hands) > 0:
-                ready_frame_count += 1
-                time.sleep(0.05)
+                if len(frame.hands) > 0:
+                    ready_frame_count += 1
+                    maybe_sleep(0.05)
 
-        time.sleep(0.5)
+        maybe_sleep(0.5)
 
 
         """
         TUTORIAL
         """
-        print()
-        print("Let's run through a tutorial.")
-        time.sleep(0.5)
-        print("Hold your hand over the input device to play.")
-        time.sleep(0.5)
-        print("We'll count down from 3, and on 'THROW', play your move.")
-        time.sleep(0.5)
+        if leap_connected:
+            print()
+            print("Let's run through a tutorial.")
+            maybe_sleep(0.5)
+            print("Hold your hand over the input device to play.")
+            maybe_sleep(0.5)
+            print("We'll count down from 3, and on 'THROW', play your move.")
+            maybe_sleep(0.5)
 
-        print ('Hold your hand over the screen when ready...')
-        print()
-        ready_frame_count = 0
-        while True:
-            if ready_frame_count >= 5:
-                break
-
-            frame = controller.frame()
-
-            if len(frame.hands) > 0:
-                ready_frame_count += 1
-                time.sleep(0.05)
-
-
-        for choice in CHOICES:
-            correct_plays = 0
-            print("Let's practice throwing " + FULL_PLAY[choice])
-            time.sleep(1)
+            print ('Hold your hand over the screen when ready...')
+            print()
+            ready_frame_count = 0
             while True:
-                if correct_plays >= 3:
+                if ready_frame_count >= 5:
                     break
 
-                print("On 3, throw " + FULL_PLAY[choice])
+                frame = controller.frame()
 
-                for i in range(3, 0, -1):
-                    print(str(i) + '... ')
-                    time.sleep(0.9)
-                print('THROW')
+                if len(frame.hands) > 0:
+                    ready_frame_count += 1
+                    maybe_sleep(0.05)
 
-                # use a move dict to get an average to make sure we're reading the input correctly
-                move_history = {} # reset dict
-                for i in range(20):
-                    move = listener.getMove(controller)
-                    if move:
-                        if move in move_history:
-                            move_history[move] += 1
-                        else:
-                            move_history[move] = 1
 
-                if not len(move_history):
-                    print("Could not read input, let's again...")
+            for choice in CHOICES:
+                correct_plays = 0
+                print("Let's practice throwing " + FULL_PLAY[choice])
+                maybe_sleep(1)
+                while True:
+                    if correct_plays >= 3:
+                        break
+
+                    print("On 3, throw " + FULL_PLAY[choice])
+
+                    for i in range(3, 0, -1):
+                        print(str(i) + '... ')
+                        maybe_sleep(0.9)
+                    print('THROW')
+
+                    # use a move dict to get an average to make sure we're reading the input correctly
+                    move_history = {} # reset dict
+                    for i in range(20):
+                        move = listener.getMove(controller)
+                        if move:
+                            if move in move_history:
+                                move_history[move] += 1
+                            else:
+                                move_history[move] = 1
+
+                    if not len(move_history):
+                        print("Could not read input, let's again...")
+                        print()
+                        maybe_sleep(1)
+                        continue
+
+                    their_play = dict_max(move_history)
+
+                    if their_play == choice:
+                        correct_plays += 1
+                        print('Great!')
+                    else:
+                        print("Sorry, I thought you played " + FULL_PLAY[their_play] + ". Let's try again.")
                     print()
-                    time.sleep(1)
-                    continue
-
-                their_play = dict_max(move_history)
-
-                if their_play == choice:
-                    correct_plays += 1
-                    print('Great!')
-                else:
-                    print("Sorry, I thought you played " + FULL_PLAY[their_play] + ". Let's try again.")
-                print()
-                time.sleep(1)
+                    maybe_sleep(1)
+            print("Perfect! Let's begin...")
+        else:
+            print('Press Left for ROCK, Up for PAPER, Right for SCISSORS, and Down to quit.')
 
 
-        print("Perfect! Let's begin...")
-        print ('Hold your hand over the screen when ready...')
-        ready_frame_count = 0
-        while True:
-            if ready_frame_count >= 5:
-                break
+        if leap_connected:
+            print ('Hold your hand over the screen when ready...')
+            ready_frame_count = 0
+            while True:
+                if ready_frame_count >= 5:
+                    break
 
-            frame = controller.frame()
+                frame = controller.frame()
 
-            if len(frame.hands) > 0:
-                ready_frame_count += 1
-                time.sleep(0.05)
+                if len(frame.hands) > 0:
+                    ready_frame_count += 1
+                    maybe_sleep(0.05)
+        else:
+            raw_input("Press Enter to continue.")
 
-        time.sleep(2)
+        maybe_sleep(2)
 
 
         """
@@ -360,30 +410,38 @@ def main():
             guess = get_guess(history, M)
             our_play = BEATS[guess]
 
-            for i in range(3, 0, -1):
-                print(str(i) + '... ')
-                time.sleep(0.9)
-            print('THROW')
+            if leap_connected:
 
-            # use a move dict to get an average to make sure we're reading the input correctly
-            move_history = {} # reset dict
-            for i in range(20):
-                move = listener.getMove(controller)
-                if move:
-                    if move in move_history:
-                        move_history[move] += 1
-                    else:
-                        move_history[move] = 1
+                for i in range(3, 0, -1):
+                    print(str(i) + '... ')
+                    maybe_sleep(0.9)
+                print('THROW')
 
-            if not len(move_history):
-                print('Could not read input, trying again...')
-                print_divider()
-                time.sleep(2)
-                print()
-                continue
+                # use a move dict to get an average to make sure we're reading the input correctly
+                move_history = {} # reset dict
+                for i in range(20):
+                    move = listener.getMove(controller)
+                    if move:
+                        if move in move_history:
+                            move_history[move] += 1
+                        else:
+                            move_history[move] = 1
+
+                if not len(move_history):
+                    print('Could not read input, trying again...')
+                    print_divider()
+                    maybe_sleep(2)
+                    print()
+                    continue
 
 
-            their_play = dict_max(move_history)
+                their_play = dict_max(move_history)
+            else:
+                char = get_char()
+                their_play = char_map[char]
+
+                if char == "down" or char == False:
+                    break
             # print(their_play)
             # print(move_history)
 
@@ -426,7 +484,7 @@ def main():
                 history.pop()
 
             game['turn'] += 1
-            time.sleep(2)
+            maybe_sleep(2)
             print()
 
     except:
@@ -439,7 +497,8 @@ def main():
         print_divider()
 
     finally:
-        controller.remove_listener(listener)
+        if leap_connected:
+            controller.remove_listener(listener)
 
         # pickle graph
         cPickle.dump(M, open(PICKLE_FILE, 'wb'))
