@@ -62,7 +62,7 @@ void setup() {
   thumb.attach(9);
 
   upperFingers.write(170);
-  upperFingers.write(120);
+  lowerFingers.write(120);
   thumb.write(150);
 }
 

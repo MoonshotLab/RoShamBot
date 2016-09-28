@@ -4,9 +4,8 @@ from __future__ import division, print_function
 
 import os, sys, inspect, tty, termios, time, cPickle
 
-PATH_TO_LEAP_SDK = '/Users/prichey/Documents/src/LeapSDK/lib'
 src_dir = os.path.dirname(inspect.getfile(inspect.currentframe()))
-lib_dir = os.path.abspath(os.path.join(src_dir, PATH_TO_LEAP_SDK))
+lib_dir = os.path.abspath(os.path.join(src_dir, os.environ.get("LEAP_SDK_LOCATION")))
 sys.path.insert(0, lib_dir)
 import Leap
 
@@ -14,13 +13,18 @@ from numpy.random import choice as npchoice
 from collections import deque
 import serial
 import struct
+from dotenv import load_dotenv
+
+dotenv_path = join(dirname(__file__), '.env')
+load_dotenv(dotenv_path)
 
 MEMORY = 5
 INITIAL_WEIGHT = 1
-ROUNDS_TO_WIN = 5
+ROUNDS_TO_WIN = 3
 
-LOAD_FRESH = True
+LOAD_FRESH = False
 CONNECT_TO_ARDUINO = True
+PLAY_TUTORIAL = False
 
 PICKLE_FILE = 'model_list.pk'
 
@@ -184,7 +188,7 @@ def main():
     try:
         if CONNECT_TO_ARDUINO:
             try:
-                bot = serial.Serial('/dev/cu.usbmodem1411', 9600, timeout=1)
+                bot = serial.Serial(os.environ.get("SERIAL_PORT"), 9600, timeout=1)
                 bot_connected = True
             except:
                 print('Could not connect to Arduino.')
@@ -245,87 +249,90 @@ def main():
         time.sleep(0.5)
 
 
-        """
-        TUTORIAL
-        """
-        print()
-        print("Let's run through a tutorial.")
-        time.sleep(0.5)
-        print("Hold your hand over the input device to play.")
-        time.sleep(0.5)
-        print("We'll count down from 3, and on 'THROW', play your move.")
-        time.sleep(0.5)
+        if PLAY_TUTORIAL:
+            """
+            TUTORIAL
+            """
+            print()
+            print("Let's run through a tutorial.")
+            time.sleep(0.5)
+            print("Hold your hand over the input device to play.")
+            time.sleep(0.5)
+            print("We'll count down from 3, and on 'THROW', play your move.")
+            time.sleep(0.5)
 
-        print ('Hold your hand over the screen when ready...')
-        print()
-        ready_frame_count = 0
-        while True:
-            if ready_frame_count >= 5:
-                break
-
-            frame = controller.frame()
-
-            if len(frame.hands) > 0:
-                ready_frame_count += 1
-                time.sleep(0.05)
-
-
-        for choice in CHOICES:
-            correct_plays = 0
-            print("Let's practice throwing " + FULL_PLAY[choice])
-            time.sleep(1)
+            print ('Hold your hand over the screen when ready...')
+            print()
+            ready_frame_count = 0
             while True:
-                if correct_plays >= 3:
+                if ready_frame_count >= 5:
                     break
 
-                print("On 3, throw " + FULL_PLAY[choice])
+                frame = controller.frame()
 
-                for i in range(3, 0, -1):
-                    print(str(i) + '... ')
-                    time.sleep(0.9)
-                print('THROW')
+                if len(frame.hands) > 0:
+                    ready_frame_count += 1
+                    time.sleep(0.05)
 
-                # use a move dict to get an average to make sure we're reading the input correctly
-                move_history = {} # reset dict
-                for i in range(20):
-                    move = listener.getMove(controller)
-                    if move:
-                        if move in move_history:
-                            move_history[move] += 1
-                        else:
-                            move_history[move] = 1
 
-                if not len(move_history):
-                    print("Could not read input, let's again...")
+            for choice in CHOICES:
+                correct_plays = 0
+                print("Let's practice throwing " + FULL_PLAY[choice])
+                time.sleep(1)
+                while True:
+                    if correct_plays >= 3:
+                        break
+
+                    print("On 3, throw " + FULL_PLAY[choice])
+
+                    for i in range(3, 0, -1):
+                        print(str(i) + '... ')
+                        time.sleep(0.5)
+                    print('THROW')
+
+                    bot.write(struct.pack('>B', INT_PLAY[choice]))
+
+                    # use a move dict to get an average to make sure we're reading the input correctly
+                    move_history = {} # reset dict
+                    for i in range(20):
+                        move = listener.getMove(controller)
+                        if move:
+                            if move in move_history:
+                                move_history[move] += 1
+                            else:
+                                move_history[move] = 1
+
+                    if not len(move_history):
+                        print("Could not read input, let's again...")
+                        print()
+                        time.sleep(1)
+                        continue
+
+                    their_play = dict_max(move_history)
+
+                    if their_play == choice:
+                        correct_plays += 1
+                        print('Great!')
+                    else:
+                        print("Sorry, I thought you played " + FULL_PLAY[their_play] + ". Let's try again.")
                     print()
                     time.sleep(1)
-                    continue
-
-                their_play = dict_max(move_history)
-
-                if their_play == choice:
-                    correct_plays += 1
-                    print('Great!')
-                else:
-                    print("Sorry, I thought you played " + FULL_PLAY[their_play] + ". Let's try again.")
-                print()
-                time.sleep(1)
 
 
-        print("Perfect! Let's begin...")
-        print ('Hold your hand over the screen when ready...')
-        ready_frame_count = 0
-        while True:
-            if ready_frame_count >= 5:
-                break
+            print("Perfect! Let's begin...")
+            print ('Hold your hand over the screen when ready...')
+            ready_frame_count = 0
+            while True:
+                if ready_frame_count >= 5:
+                    break
 
-            frame = controller.frame()
+                frame = controller.frame()
 
-            if len(frame.hands) > 0:
-                ready_frame_count += 1
-                time.sleep(0.05)
+                if len(frame.hands) > 0:
+                    ready_frame_count += 1
+                    time.sleep(0.05)
 
-        time.sleep(2)
+            time.sleep(2)
 
 
         """
@@ -362,7 +369,7 @@ def main():
 
             for i in range(3, 0, -1):
                 print(str(i) + '... ')
-                time.sleep(0.9)
+                time.sleep(0.5)
             print('THROW')
 
             # use a move dict to get an average to make sure we're reading the input correctly
@@ -416,8 +423,8 @@ def main():
                 print("We tied %.2f%% (%d / %d)" % (game['tie'] / game['turn'] * 100, game['tie'], game['turn']))
                 print("You lost %.2f%% (%d / %d)" % (game['win'] / game['turn'] * 100, game['win'], game['turn']))
                 print_divider()
-                # for model_level in M:
-                #     print(model_level)
+                for model_level in M:
+                    print(model_level)
                 break
 
             history.appendleft(their_play)
