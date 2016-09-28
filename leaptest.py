@@ -4,6 +4,8 @@ lib_dir = os.path.abspath(os.path.join(src_dir, '/Users/prichey/Documents/src/Le
 sys.path.insert(0, lib_dir)
 import Leap
 
+CHOICES = ['r', 'p', 's']
+
 class SampleListener(Leap.Listener):
 
     def on_connect(self, controller):
@@ -42,19 +44,20 @@ class SampleListener(Leap.Listener):
             frame_num += 1
 
         if len(frame.hands) == 0:
-            return 'INVALID'
+            return False
 
         num_fingers = len(frame.fingers.extended())
+        print num_fingers
 
-        if num_fingers in [0, 2, 4, 5]:
+        if num_fingers != 3:
             if num_fingers == 0:
-                return 'ROCK'
+                return 'r'
             elif num_fingers == 2:
-                return 'SCISSORS'
-            elif num_fingers in [4, 5]:
-                return 'PAPER'
+                return 's'
+            elif num_fingers in [1, 4, 5]:
+                return 'p'
         else:
-            return 'INVALID'
+            return False
 
 
 def main():
@@ -73,9 +76,25 @@ def main():
             for i in range(3, 0, -1):
                 print i
                 time.sleep(0.9)
-            time.sleep(0.25)
-            move = listener.getMove(controller)
-            print 'You played ' + move
+
+            # use a move dict to get an average over ten frames to make sure we're guessing the right move
+            # reset dict
+            move_history = {}
+
+            for i in range(10):
+                move = listener.getMove(controller)
+                if move:
+                    if move in move_history:
+                        move_history[move] += 1
+                    else:
+                        move_history[move] = 1
+
+            if not len(move_history):
+                print 'Could not read input, trying again...'
+            else:
+                # move = dict_max(move_history)
+                print move_history
+
             time.sleep(1.5)
             print
             print 'NEW GAME'
