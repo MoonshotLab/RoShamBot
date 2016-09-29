@@ -20,12 +20,12 @@ import struct
 
 MEMORY = 5
 INITIAL_WEIGHT = 1
-ROUNDS_TO_WIN = 3
+ROUNDS_TO_WIN = 5
 
 LOAD_FRESH = False
-CONNECT_TO_ARDUINO = True
-PLAY_TUTORIAL = False
-LEAP_CONTROL = False
+CONNECT_TO_ARDUINO = False
+PLAY_TUTORIAL = True
+LEAP_CONTROL = True
 
 PICKLE_FILE = 'model_list.pk'
 
@@ -268,7 +268,6 @@ def main():
         print(DIVIDER)
         print()
         print('Welcome to Roshambot 3000')
-        print("We'll play best of %d" % ROUNDS_TO_WIN)
         print_divider()
 
         maybe_sleep(0.5)
@@ -281,7 +280,7 @@ def main():
             print ('Hold your hand over the screen to begin...')
             ready_frame_count = 0
             while True:
-                if ready_frame_count >= 10:
+                if ready_frame_count >= 5:
                     break
 
                 frame = controller.frame()
@@ -310,6 +309,7 @@ def main():
             ready_frame_count = 0
             while True:
                 if ready_frame_count >= 5:
+                    print()
                     break
 
                 frame = controller.frame()
@@ -319,23 +319,20 @@ def main():
                     maybe_sleep(0.05)
 
 
-            for choice in CHOICES:
-                correct_plays = 0
-                print("Let's practice throwing " + FULL_PLAY[choice])
-                maybe_sleep(1)
+            tutorial_repeat = 2
+            tutorial_moves = [choice for choice in CHOICES * 2]
 
+            for tutorial_move in tutorial_moves:
                 while True:
-                    if correct_plays >= 3:
-                        break
-
-                    print("On 3, throw " + FULL_PLAY[choice])
+                    print("On 3, throw " + FULL_PLAY[tutorial_move])
 
                     for i in range(3, 0, -1):
                         print(str(i) + '... ')
                         maybe_sleep(0.9)
                     print('THROW')
 
-                    bot.write(struct.pack('>B', INT_PLAY[choice]))
+                    if bot_connected:
+                        bot.write(struct.pack('>B', INT_PLAY[tutorial_move]))
 
                     # use a move dict to get an average to make sure we're reading the input correctly
                     move_history = {} # reset dict
@@ -349,26 +346,28 @@ def main():
 
                     if not len(move_history):
                         print("Could not read input, let's again...")
+                        maybe_sleep(1.5)
                         print()
 
-                        maybe_sleep(1)
                         continue
 
                     their_play = dict_max(move_history)
 
-                    if their_play == choice:
-                        correct_plays += 1
+                    if their_play == tutorial_move:
                         print('Great!')
+                        maybe_sleep(1.5)
+                        print()
+                        break
                     else:
                         print("Sorry, I thought you played " + FULL_PLAY[their_play] + ". Let's try again.")
+                        maybe_sleep(1.5)
+                        print()
+                        continue
                     print()
 
-                    maybe_sleep(1)
-            print("Perfect! Let's begin...")
-        else:
-            print('Press Left for ROCK, Up for PAPER, Right for SCISSORS, and Down to quit.')
 
-
+        print("Now, let's play!")
+        print("We'll play best of %d" % ROUNDS_TO_WIN)
         if leap_connected:
             print ('Hold your hand over the screen when ready...')
             ready_frame_count = 0
@@ -495,6 +494,7 @@ def main():
             print()
 
     except:
+        raise
         print_divider()
         if game['turn'] > 1:
             print("You won %.2f%% (%d / %d)" % (game['loss'] / game['turn'] * 100, game['loss'], game['turn']))
