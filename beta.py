@@ -319,8 +319,8 @@ def main():
                     maybe_sleep(0.05)
 
 
-            tutorial_repeat = 2
-            tutorial_moves = [choice for choice in CHOICES * 2]
+            tutorial_repeat = 10
+            tutorial_moves = [choice for choice in CHOICES * tutorial_repeat]
 
             for tutorial_move in tutorial_moves:
                 while True:
