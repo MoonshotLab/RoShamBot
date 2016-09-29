@@ -22,10 +22,10 @@ MEMORY = 5
 INITIAL_WEIGHT = 1
 ROUNDS_TO_WIN = 5
 
-LOAD_FRESH = False
-CONNECT_TO_ARDUINO = False
-PLAY_TUTORIAL = True
-LEAP_CONTROL = True
+LOAD_FRESH = os.environ.get("LOAD_FRESH")
+CONNECT_TO_ARDUINO = os.environ.get("CONNECT_TO_ARDUINO")
+PLAY_TUTORIAL = os.environ.get("PLAY_TUTORIAL")
+LEAP_CONTROL = os.environ.get("LEAP_CONTROL")
 
 PICKLE_FILE = 'model_list.pk'
 
@@ -320,7 +320,7 @@ def main():
 
 
             tutorial_repeat = 2
-            tutorial_moves = [choice for choice in CHOICES * 2]
+            tutorial_moves = [choice for choice in CHOICES * tutorial_repeat]
 
             for tutorial_move in tutorial_moves:
                 while True:
