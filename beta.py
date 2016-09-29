@@ -22,14 +22,15 @@ def str_to_bool(val): return val == 'True'
 
 MEMORY = 5
 INITIAL_WEIGHT = 1
-ROUNDS_TO_WIN = 5
+ROUNDS_TO_WIN = 10
 
 LOAD_FRESH = str_to_bool(os.environ.get("LOAD_FRESH"))
 CONNECT_TO_ARDUINO = str_to_bool(os.environ.get("CONNECT_TO_ARDUINO"))
 PLAY_TUTORIAL = str_to_bool(os.environ.get("PLAY_TUTORIAL"))
 LEAP_CONTROL = str_to_bool(os.environ.get("LEAP_CONTROL"))
+DEBUG = str_to_bool(os.environ.get("DEBUG"))
 
-PICKLE_FILE = 'model_list.pk'
+PICKLE_FILE = 'model.pk'
 
 ROOT = '0'
 CHOICES = ['r', 'p', 's']
@@ -175,7 +176,6 @@ def get_possible_plays(query, model):
         if query + choice in model_level:
             plays[choice] = model_level[query + choice]
 
-    # print(plays)
     return plays
 
 
@@ -228,6 +228,17 @@ def print_divider():
     print(DIVIDER)
     print()
 
+def get_fresh_model():
+    return {
+        'record': {
+            'win': 0,
+            'loss': 0,
+            'tie': 0,
+            'games': 0
+        },
+        'nn': []
+    }
+
 def main():
     try:
         if CONNECT_TO_ARDUINO:
@@ -253,13 +264,13 @@ def main():
             leap_connected = False
 
         if LOAD_FRESH:
-            M = []
+            M = get_fresh_model()
         else:
             try:
                 M = cPickle.load(open(PICKLE_FILE, 'rb'))
             except:
                 print('Could not load pickled model. Starting fresh.')
-                M = []
+                M = get_fresh_model()
 
 
         history = deque()
@@ -403,8 +414,8 @@ def main():
             len_history = len(history)
             nodes = list(history)
 
-            if len_history > len(M):
-                M.append(dict())
+            if len_history > len(M['nn']):
+                M['nn'].append(dict())
 
 
             while len(nodes):
@@ -413,17 +424,17 @@ def main():
                 concatted_row = concat_row(nodes)
                 concatted_row = concatted_row[::-1] # look backwards in history for most likely next play
 
-                if concatted_row in M[depth]:
-                    # print('incrementing: ', concatted_row, ' to a val of ', M[depth][concatted_row])
-                    M[depth][concatted_row] += 1
+                if concatted_row in M['nn'][depth]:
+                    print('incrementing: ', concatted_row, ' to a val of ', M['nn'][depth][concatted_row])
+                    M['nn'][depth][concatted_row] += 1
                 else:
-                    # print('adding: ', concatted_row)
-                    M[depth][concatted_row] = 1
+                    print('adding: ', concatted_row)
+                    M['nn'][depth][concatted_row] = 1
 
                 nodes.pop()
 
             print_divider()
-            guess = get_guess(history, M)
+            guess = get_guess(history, M['nn'])
             our_play = BEATS[guess]
 
             if leap_connected:
@@ -467,18 +478,22 @@ def main():
             if bot_connected:
                 bot.write(struct.pack('>B', INT_PLAY[our_play]))
 
+            M['record']['games'] += 1
             game_result = get_game_result(our_play, their_play)
 
             print("I believe you played %s" % (FULL_PLAY[their_play].upper()))
             if game_result == 0:
                 print('Tie!')
                 game['tie'] += 1
+                M['record']['tie'] += 1
             elif game_result == -1:
                 print('You win!')
                 game['loss'] += 1
+                M['record']['loss'] += 1
             elif game_result == 1:
                 print('I win!')
                 game['win'] += 1
+                M['record']['win'] += 1
 
             print_divider()
 
@@ -488,8 +503,11 @@ def main():
                 print("We tied %.2f%% (%d / %d)" % (game['tie'] / game['turn'] * 100, game['tie'], game['turn']))
                 print("You lost %.2f%% (%d / %d)" % (game['win'] / game['turn'] * 100, game['win'], game['turn']))
                 print_divider()
-                for model_level in M:
-                    print(model_level)
+
+                if DEBUG:
+                    print(M['record'])
+                    for model_level in M['nn']:
+                        print(model_level)
                 break
 
             history.appendleft(their_play)
