@@ -425,10 +425,12 @@ def main():
                 concatted_row = concatted_row[::-1] # look backwards in history for most likely next play
 
                 if concatted_row in M['nn'][depth]:
-                    print('incrementing: ', concatted_row, ' to a val of ', M['nn'][depth][concatted_row])
+                    if DEBUG:
+                        print('incrementing: ', concatted_row, ' to a val of ', M['nn'][depth][concatted_row])
                     M['nn'][depth][concatted_row] += 1
                 else:
-                    print('adding: ', concatted_row)
+                    if DEBUG:
+                        print('adding: ', concatted_row)
                     M['nn'][depth][concatted_row] = 1
 
                 nodes.pop()
