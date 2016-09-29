@@ -50,6 +50,8 @@ void playMove(int move) {
     case 2:
       playScissors();
       break;
+     default:
+       exit(0);
   }
 }
 
