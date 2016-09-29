@@ -18,14 +18,16 @@ from collections import deque
 import serial
 import struct
 
+def str_to_bool(val): return val == 'True'
+
 MEMORY = 5
 INITIAL_WEIGHT = 1
 ROUNDS_TO_WIN = 5
 
-LOAD_FRESH = os.environ.get("LOAD_FRESH")
-CONNECT_TO_ARDUINO = os.environ.get("CONNECT_TO_ARDUINO")
-PLAY_TUTORIAL = os.environ.get("PLAY_TUTORIAL")
-LEAP_CONTROL = os.environ.get("LEAP_CONTROL")
+LOAD_FRESH = str_to_bool(os.environ.get("LOAD_FRESH"))
+CONNECT_TO_ARDUINO = str_to_bool(os.environ.get("CONNECT_TO_ARDUINO"))
+PLAY_TUTORIAL = str_to_bool(os.environ.get("PLAY_TUTORIAL"))
+LEAP_CONTROL = str_to_bool(os.environ.get("LEAP_CONTROL"))
 
 PICKLE_FILE = 'model_list.pk'
 
@@ -162,6 +164,9 @@ def get_guess(history, model):
     # print(guess)
     return guess
 
+def str_to_bool(val):
+    return val == 'True'
+
 def get_possible_plays(query, model):
     plays = {}
     model_level = model[len(query)]
@@ -296,6 +301,9 @@ def main():
         TUTORIAL
         """
         if PLAY_TUTORIAL and leap_connected:
+            print(PLAY_TUTORIAL)
+            print(leap_connected)
+            print(PLAY_TUTORIAL and leap_connected)
             print()
             print("Let's run through a tutorial.")
             maybe_sleep(0.5)
