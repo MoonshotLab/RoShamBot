@@ -40,27 +40,33 @@ INT_PLAY = {'r': 0, 'p': 1, 's': 2}
 DIVIDER = "=" * 80
 
 ASCII_ART = {
-    'r':"""
+    'r':
+"""
     _______
 ---'   ____)
       (_____)
       (_____)
       (____)
----.__(___)""",
-    'p':"""
+---.__(___)
+""",
+    'p':
+"""
     _______
 ---'   ____)____
           ______)
           _______)
          _______)
----.__________)""",
-    's':"""
+---.__________)
+""",
+    's':
+"""
     _______
 ---'   ____)____
           ______)
        __________)
       (____)
----.__(___)"""
+---.__(___)
+"""
 }
 
 class Getch:
@@ -293,18 +299,21 @@ def main():
         WAIT TO BEGIN
         """
         if leap_connected:
-            print ('Hold your hand over the screen to begin...')
+            print ('Hold your hand over the screen to begin.')
             ready_frame_count = 0
             while True:
-                if ready_frame_count >= 5:
+                if ready_frame_count >= 10:
                     break
 
                 frame = controller.frame()
 
                 if len(frame.hands) > 0:
                     ready_frame_count += 1
+                    sys.stdout.write('.')
+                    sys.stdout.flush()
                     maybe_sleep(0.05)
 
+        print()
         maybe_sleep(0.5)
 
 
@@ -335,9 +344,12 @@ def main():
 
                 if len(frame.hands) > 0:
                     ready_frame_count += 1
+                    sys.stdout.write('.')
+                    sys.stdout.flush()
                     maybe_sleep(0.05)
 
 
+            print()
             tutorial_repeat = 2
             tutorial_moves = [choice for choice in CHOICES * tutorial_repeat]
 
@@ -497,6 +509,7 @@ def main():
                 game['win'] += 1
                 M['record']['win'] += 1
 
+            print("Out of %d games, you've won %d, I've won %d, and we've tied %d times." % (game['turn'], game['loss'], game['win'], game['tie']))
             print_divider()
 
             if game['loss'] >= ROUNDS_TO_WIN or game['win'] >= ROUNDS_TO_WIN:
