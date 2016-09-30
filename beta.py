@@ -37,7 +37,7 @@ ROOT = '0'
 CHOICES = ['r', 'p', 's']
 BEATS = {'r': 'p', 'p': 's', 's': 'r'}
 FULL_PLAY = {'r': 'rock', 'p': 'paper', 's': 'scissors'}
-INT_PLAY = {'r': 0, 'p': 1, 's': 2, 'n': 3}
+SERIAL_MAP = {'r': 0, 'p': 1, 's': 2, 'n': 3}
 DIVIDER = "=" * 80
 
 ASCII_ART = {
@@ -357,7 +357,7 @@ def main():
                     print("On 3, throw " + FULL_PLAY[tutorial_move])
 
                     if bot_connected:
-                        bot.write(struct.pack('>B', INT_PLAY['n']))
+                        bot.write(struct.pack('>B', SERIAL_MAP['n']))
 
                     time.sleep(1)
 
@@ -367,7 +367,7 @@ def main():
                     print('THROW')
 
                     if bot_connected:
-                        bot.write(struct.pack('>B', INT_PLAY[tutorial_move]))
+                        bot.write(struct.pack('>B', SERIAL_MAP[tutorial_move]))
 
                     # use a move dict to get an average to make sure we're reading the input correctly
                     move_history = {} # reset dict
@@ -437,7 +437,7 @@ def main():
         while True:
 
             if bot_connected:
-                bot.write(struct.pack('>B', INT_PLAY['n']))
+                bot.write(struct.pack('>B', SERIAL_MAP['n']))
 
             # traverse history, updating weights
             len_history = len(history)
@@ -511,7 +511,7 @@ def main():
             print()
 
             if bot_connected:
-                bot.write(struct.pack('>B', INT_PLAY[our_play]))
+                bot.write(struct.pack('>B', SERIAL_MAP[our_play]))
 
             M['record']['games'] += 1
             game_result = get_game_result(our_play, their_play)
