@@ -23,6 +23,7 @@ def str_to_bool(val): return val == 'True'
 MEMORY = 5
 INITIAL_WEIGHT = 1
 ROUNDS_TO_WIN = 5
+TIME_BETWEEN_MOVES = 2.5
 
 LOAD_FRESH = str_to_bool(os.environ.get("LOAD_FRESH"))
 CONNECT_TO_ARDUINO = str_to_bool(os.environ.get("CONNECT_TO_ARDUINO"))
@@ -302,7 +303,7 @@ def main():
             print ('Hold your hand over the screen to begin.')
             ready_frame_count = 0
             while True:
-                if ready_frame_count >= 10:
+                if ready_frame_count >= 20:
                     break
 
                 frame = controller.frame()
@@ -327,13 +328,14 @@ def main():
             print("Hold your hand over the input device to play.")
             maybe_sleep(0.5)
             print("We'll count down from 3, and on 'THROW', play your move.")
-            maybe_sleep(0.5)
+            maybe_sleep(2)
 
             print ('Hold your hand over the screen when ready...')
-            print()
+            # print()
             ready_frame_count = 0
             while True:
-                if ready_frame_count >= 5:
+                if ready_frame_count >= 10:
+                    maybe_sleep(2)
                     print()
                     break
 
@@ -344,7 +346,6 @@ def main():
                     sys.stdout.write('.')
                     sys.stdout.flush()
                     maybe_sleep(0.05)
-
 
             print()
             tutorial_repeat = 2
@@ -374,7 +375,7 @@ def main():
 
                     if not len(move_history):
                         print("Could not read input, let's again...")
-                        maybe_sleep(1.5)
+                        maybe_sleep(TIME_BETWEEN_MOVES)
                         print()
 
                         continue
@@ -383,35 +384,45 @@ def main():
 
                     if their_play == tutorial_move:
                         print('Great!')
-                        maybe_sleep(1.5)
+                        maybe_sleep(TIME_BETWEEN_MOVES)
                         print()
                         break
                     else:
                         print("Sorry, I thought you played " + FULL_PLAY[their_play] + ". Let's try again.")
-                        maybe_sleep(1.5)
+                        maybe_sleep(TIME_BETWEEN_MOVES)
                         print()
                         continue
                     print()
 
-
+        print()
         print("Now, let's play!")
-        print("We'll play best of %d" % ROUNDS_TO_WIN)
+        time.sleep(1)
+        print("We'll play best of %d." % ROUNDS_TO_WIN)
+        time.sleep(1)
+        print("On the count of 3, throw your move!")
+        time.sleep(1)
+        print("Good luck!")
+        time.sleep(2)
+        print()
         if leap_connected:
             print ('Hold your hand over the screen when ready...')
             ready_frame_count = 0
             while True:
-                if ready_frame_count >= 5:
+                if ready_frame_count >= 20:
                     break
 
                 frame = controller.frame()
 
                 if len(frame.hands) > 0:
                     ready_frame_count += 1
+                    sys.stdout.write('.')
+                    sys.stdout.flush()
                     maybe_sleep(0.05)
         else:
             raw_input("Press Enter to continue.")
 
-        maybe_sleep(2)
+        maybe_sleep(0.5)
+        print()
 
 
         """
@@ -448,11 +459,14 @@ def main():
             guess = get_guess(history, M['nn'])
             our_play = BEATS[guess]
 
+            print("ROUND %d" % game['turn'])
+
             if leap_connected:
                 for i in range(3, 0, -1):
                     print(str(i) + '... ')
                     maybe_sleep(0.9)
                 print('THROW')
+                print()
 
                 # use a move dict to get an average to make sure we're reading the input correctly
                 move_history = {} # reset dict
@@ -467,7 +481,7 @@ def main():
                 if not len(move_history):
                     print('Could not read input, trying again...')
                     print_divider()
-                    maybe_sleep(2)
+                    maybe_sleep(TIME_BETWEEN_MOVES)
                     print()
                     continue
 
@@ -509,12 +523,12 @@ def main():
             print("Out of %d games, you've won %d, I've won %d, and we've tied %d times." % (game['turn'], game['loss'], game['win'], game['tie']))
             print_divider()
 
-            if game['loss'] >= ROUNDS_TO_WIN or game['win'] >= ROUNDS_TO_WIN:
+            # if game['loss'] >= ROUNDS_TO_WIN or game['win'] >= ROUNDS_TO_WIN:
+            if game['turn'] >= ROUNDS_TO_WIN:
                 print_divider()
                 print("You won %.2f%% (%d / %d)" % (game['loss'] / game['turn'] * 100, game['loss'], game['turn']))
                 print("We tied %.2f%% (%d / %d)" % (game['tie'] / game['turn'] * 100, game['tie'], game['turn']))
                 print("You lost %.2f%% (%d / %d)" % (game['win'] / game['turn'] * 100, game['win'], game['turn']))
-                print_divider()
 
                 if DEBUG:
                     print(M['record'])
@@ -528,7 +542,7 @@ def main():
                 history.pop()
 
             game['turn'] += 1
-            maybe_sleep(2)
+            maybe_sleep(TIME_BETWEEN_MOVES)
             print()
 
     except:
@@ -538,10 +552,10 @@ def main():
             print("You won %.2f%% (%d / %d)" % (game['loss'] / game['turn'] * 100, game['loss'], game['turn']))
             print("We tied %.2f%% (%d / %d)" % (game['tie'] / game['turn'] * 100, game['tie'], game['turn']))
             print("You lost %.2f%% (%d / %d)" % (game['win'] / game['turn'] * 100, game['win'], game['turn']))
-        print("Thanks for playing!")
-        print_divider()
 
     finally:
+        print("Thanks for playing!")
+        print_divider()
         if leap_connected:
             controller.remove_listener(listener)
 
