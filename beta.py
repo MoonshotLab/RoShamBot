@@ -321,9 +321,6 @@ def main():
         TUTORIAL
         """
         if PLAY_TUTORIAL and leap_connected:
-            print(PLAY_TUTORIAL)
-            print(leap_connected)
-            print(PLAY_TUTORIAL and leap_connected)
             print()
             print("Let's run through a tutorial.")
             maybe_sleep(0.5)
