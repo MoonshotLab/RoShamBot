@@ -3,14 +3,14 @@
 Servo upperFingers, lowerFingers, thumb;
 int input;
 
-int readScissorsPin = 21;
+int readScissorsPin = 22;
 int readPaperPin = 23;
 int readRockPin = 24;
 int readErrorPin = 25;
-int countOnePin = 50;
-int countTwoPin = 51;
-int countThreePin = 52;
-int countThrowPin = 53;
+int countOnePin = 51;
+int countTwoPin = 52;
+int countThreePin = 53;
+int countThrowPin = 50;
 
 
 // digital scissors 21
@@ -18,10 +18,10 @@ int countThrowPin = 53;
 // digital rock 24
 // digital error 25
 
-// 1     50
+// 1     53
 // 2     51
 // 3     52
-// THROW 53
+// THROW 50
 
 
 // upper fingers open 170
@@ -79,7 +79,7 @@ void playMove(int input) {
       playScissors();
       break;
     case 3:
-      playNeutral();
+       playNeutral();
       break;
      default:
        exit(0);
@@ -182,7 +182,7 @@ void lightLed(int input) {
       digitalWrite(countTwoPin, LOW);
       digitalWrite(countThreePin, LOW);
       digitalWrite(countThrowPin, HIGH);
-      delay(900);
+      delay(100);
       break;
   }
 }
@@ -210,7 +210,16 @@ void setup() {
 }
 
 void loop() {
-  while(Serial.available()==0){};
+  while(Serial.available()==0){
+    digitalWrite(readScissorsPin, LOW);
+    digitalWrite(readPaperPin, LOW);
+    digitalWrite(readRockPin, LOW);
+    digitalWrite(readErrorPin, LOW);
+    digitalWrite(countOnePin, LOW);
+    digitalWrite(countTwoPin, LOW);
+    digitalWrite(countThreePin, LOW);
+    digitalWrite(countThrowPin, LOW);
+  };
   input = Serial.read();
 
   Serial.println(input);

@@ -349,7 +349,7 @@ def main():
                     maybe_sleep(0.05)
 
             print()
-            tutorial_repeat = 2
+            tutorial_repeat = 1
             tutorial_moves = [choice for choice in CHOICES * tutorial_repeat]
             maybe_sleep(1)
 
