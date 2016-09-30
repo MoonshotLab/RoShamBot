@@ -3,23 +3,30 @@
 Servo upperFingers, lowerFingers, thumb;
 int move;
 
-// const int OPEN = 180;
-// const int CLOSE = 0;
-
 // upper fingers open 170
-// upper fingers closed 120
+// upper fingers neutral 140
+// upper fingers closed 110
 
 // lower fingers open 120
+// lower fingers neutral 145
 // lower fingers closed 170
 
 // thumb open 150
+// thumb neutral 135
 // thumb closed 120
 
 
 int pos = 0;    // variable to store the servo position
 
+void playNeutral() {
+  upperFingers.write(140);
+  lowerFingers.write(145);
+  thumb.write(135);
+  Serial.println("neutral");
+}
+
 void playRock() {
-  upperFingers.write(120);
+  upperFingers.write(110);
   lowerFingers.write(170);
   thumb.write(120);
   Serial.println("playing rock");
@@ -49,6 +56,9 @@ void playMove(int move) {
       break;
     case 2:
       playScissors();
+      break;
+    case 3:
+      playNeutral();
       break;
      default:
        exit(0);

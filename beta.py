@@ -37,7 +37,7 @@ ROOT = '0'
 CHOICES = ['r', 'p', 's']
 BEATS = {'r': 'p', 'p': 's', 's': 'r'}
 FULL_PLAY = {'r': 'rock', 'p': 'paper', 's': 'scissors'}
-INT_PLAY = {'r': 0, 'p': 1, 's': 2}
+INT_PLAY = {'r': 0, 'p': 1, 's': 2, 'n': 3}
 DIVIDER = "=" * 80
 
 ASCII_ART = {
@@ -355,6 +355,10 @@ def main():
             for tutorial_move in tutorial_moves:
                 while True:
                     print("On 3, throw " + FULL_PLAY[tutorial_move])
+
+                    if bot_connected:
+                        bot.write(struct.pack('>B', INT_PLAY['n']))
+
                     time.sleep(1)
 
                     for i in range(3, 0, -1):
@@ -431,6 +435,9 @@ def main():
         LET'S PLAY
         """
         while True:
+
+            if bot_connected:
+                bot.write(struct.pack('>B', INT_PLAY['n']))
 
             # traverse history, updating weights
             len_history = len(history)
