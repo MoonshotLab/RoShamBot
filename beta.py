@@ -324,18 +324,18 @@ def main():
         if PLAY_TUTORIAL and leap_connected:
             print()
             print("Let's run through a tutorial.")
-            maybe_sleep(0.5)
+            maybe_sleep(1)
             print("Hold your hand over the input device to play.")
-            maybe_sleep(0.5)
+            maybe_sleep(1)
             print("We'll count down from 3, and on 'THROW', play your move.")
+            print()
             maybe_sleep(2)
 
             print ('Hold your hand over the screen when ready...')
             # print()
             ready_frame_count = 0
             while True:
-                if ready_frame_count >= 10:
-                    maybe_sleep(2)
+                if ready_frame_count >= 20:
                     print()
                     break
 
@@ -350,10 +350,12 @@ def main():
             print()
             tutorial_repeat = 2
             tutorial_moves = [choice for choice in CHOICES * tutorial_repeat]
+            maybe_sleep(1)
 
             for tutorial_move in tutorial_moves:
                 while True:
                     print("On 3, throw " + FULL_PLAY[tutorial_move])
+                    time.sleep(1)
 
                     for i in range(3, 0, -1):
                         print(str(i) + '... ')
@@ -460,6 +462,7 @@ def main():
             our_play = BEATS[guess]
 
             print("ROUND %d" % game['turn'])
+            time.sleep(1)
 
             if leap_connected:
                 for i in range(3, 0, -1):
