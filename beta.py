@@ -37,8 +37,9 @@ ROOT = '0'
 CHOICES = ['r', 'p', 's']
 BEATS = {'r': 'p', 'p': 's', 's': 'r'}
 FULL_PLAY = {'r': 'rock', 'p': 'paper', 's': 'scissors'}
-SERIAL_MAP = {'r': 0, 'p': 1, 's': 2, 'n': 3}
+SERIAL_MAP = {'r': 0, 'p': 1, 's': 2, 'n': 3, 'readScissors': 4, 'readPaper': 5, 'readRock': 6, 'readError': 7, 'countOne': 8, 'countTwo': 9, 'countThree': 10, 'countThrow': 11}
 DIVIDER = "=" * 80
+COUNTDOWN_MAP = {1: 'countOne', 2: 'countTwo', 3: 'countThree', 'throw': 'countThrow'}
 
 ASCII_ART = {
     'r':
@@ -363,8 +364,16 @@ def main():
 
                     for i in range(3, 0, -1):
                         print(str(i) + '... ')
+
+                        if bot_connected:
+                            bot.write(struct.pack('>B', SERIAL_MAP[COUNTDOWN_MAP[i]]))
+
                         maybe_sleep(0.9)
+
                     print('THROW')
+
+                    if bot_connected:
+                        bot.write(struct.pack('>B', SERIAL_MAP[COUNTDOWN_MAP['throw']]))
 
                     if bot_connected:
                         bot.write(struct.pack('>B', SERIAL_MAP[tutorial_move]))
@@ -474,8 +483,14 @@ def main():
             if leap_connected:
                 for i in range(3, 0, -1):
                     print(str(i) + '... ')
+
+                    if bot_connected:
+                        bot.write(struct.pack('>B', SERIAL_MAP[COUNTDOWN_MAP[i]]))
+
                     maybe_sleep(0.9)
                 print('THROW')
+                if bot_connected:
+                    bot.write(struct.pack('>B', SERIAL_MAP[COUNTDOWN_MAP['throw']]))
                 print()
 
                 # use a move dict to get an average to make sure we're reading the input correctly
@@ -490,6 +505,8 @@ def main():
 
                 if not len(move_history):
                     print('Could not read input, trying again...')
+                    if bot_connected:
+                        bot.write(struct.pack('>B', SERIAL_MAP['readError']))
                     print_divider()
                     maybe_sleep(TIME_BETWEEN_MOVES)
                     print()
@@ -517,6 +534,8 @@ def main():
             game_result = get_game_result(our_play, their_play)
 
             print("I believe you played %s" % (FULL_PLAY[their_play].upper()))
+            if bot_connected:
+                bot.write(struct.pack('>B', SERIAL_MAP['read' + FULL_PLAY[their_play].capitalize()]))
             if game_result == 0:
                 print('Tie!')
                 game['tie'] += 1
