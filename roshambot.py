@@ -38,7 +38,12 @@ ROOT = '0'
 CHOICES = ['r', 'p', 's']
 BEATS = {'r': 'p', 'p': 's', 's': 'r'}
 FULL_PLAY = {'r': 'rock', 'p': 'paper', 's': 'scissors'}
-SERIAL_MAP = {'r': 0, 'p': 1, 's': 2, 'n': 3, 'readScissors': 4, 'readPaper': 5, 'readRock': 6, 'readError': 7, 'countOne': 8, 'countTwo': 9, 'countThree': 10, 'countThrow': 11}
+SERIAL_MAP = {
+    'r': 0, 'p': 1, 's': 2, 'n': 3,
+    'readScissors': 4, 'readPaper': 5, 'readRock': 6, 'readError': 7,
+    'countOne': 8, 'countTwo': 9, 'countThree': 10, 'countThrow': 11,
+    'incPlayerScore': 12, 'incBotScore': 13, 'resetScores': 14
+}
 DIVIDER = "=" * 80
 COUNTDOWN_MAP = {1: 'countOne', 2: 'countTwo', 3: 'countThree', 'throw': 'countThrow'}
 
@@ -199,6 +204,13 @@ def maybe_sleep(duration):
     if LEAP_CONTROL:
         time.sleep(duration)
 
+def maybe_write(msg):
+    try:
+        if bot_connected:
+            bot.write(struct.pack('>B', SERIAL_MAP[msg]))
+    except:
+        return False
+
 def dict_max(dict):
     best, best_val = '', 0
 
@@ -236,6 +248,13 @@ def print_divider():
     print()
     print(DIVIDER)
     print()
+
+def print_results(game):
+    print_divider()
+    print("You won %.2f%% (%d / %d)" % (game['loss'] / game['turn'] * 100, game['loss'], game['turn']))
+    print("We tied %.2f%% (%d / %d)" % (game['tie'] / game['turn'] * 100, game['tie'], game['turn']))
+    print("You lost %.2f%% (%d / %d)" % (game['win'] / game['turn'] * 100, game['win'], game['turn']))
+    print_divider()
 
 def get_fresh_model():
     return {
@@ -374,27 +393,19 @@ def main():
                         print("On 3, throw " + FULL_PLAY[tutorial_move] + ".")
                         print()
 
-                        if bot_connected:
-                            bot.write(struct.pack('>B', SERIAL_MAP['n']))
-
+                        maybe_write('n')
                         time.sleep(1)
 
                         for i in range(3, 0, -1):
                             print(str(i) + '... ')
-
-                            if bot_connected:
-                                bot.write(struct.pack('>B', SERIAL_MAP[COUNTDOWN_MAP[i]]))
-
+                            maybe_write(COUNTDOWN_MAP[i])
                             maybe_sleep(0.9)
 
                         print('THROW')
                         print()
 
-                        if bot_connected:
-                            bot.write(struct.pack('>B', SERIAL_MAP[COUNTDOWN_MAP['throw']]))
-
-                        if bot_connected:
-                            bot.write(struct.pack('>B', SERIAL_MAP[tutorial_move]))
+                        maybe_write(COUNTDOWN_MAP['throw'])
+                        maybe_write(tutorial_move)
 
                         # use a move dict to get an average to make sure we're reading the input correctly
                         move_history = {} # reset dict
@@ -461,8 +472,7 @@ def main():
             """
             while True:
 
-                if bot_connected:
-                    bot.write(struct.pack('>B', SERIAL_MAP['n']))
+                maybe_write('n')
 
                 # traverse history, updating weights (only if last game was not tie)
                 try:
@@ -502,14 +512,11 @@ def main():
                 if leap_connected:
                     for i in range(3, 0, -1):
                         print(str(i) + '... ')
-
-                        if bot_connected:
-                            bot.write(struct.pack('>B', SERIAL_MAP[COUNTDOWN_MAP[i]]))
-
+                        maybe_write(COUNTDOWN_MAP[i])
                         maybe_sleep(0.9)
+
                     print('THROW')
-                    if bot_connected:
-                        bot.write(struct.pack('>B', SERIAL_MAP[COUNTDOWN_MAP['throw']]))
+                    maybe_write(COUNTDOWN_MAP['throw'])
                     print()
 
                     # use a move dict to get an average to make sure we're reading the input correctly
@@ -524,8 +531,7 @@ def main():
 
                     if not len(move_history):
                         print('Could not read input, trying again...')
-                        if bot_connected:
-                            bot.write(struct.pack('>B', SERIAL_MAP['readError']))
+                        maybe_write('readError')
                         print_divider()
                         maybe_sleep(TIME_BETWEEN_MOVES)
                         print()
@@ -546,15 +552,14 @@ def main():
                 print(ASCII_ART[our_play])
                 print()
 
-                if bot_connected:
-                    bot.write(struct.pack('>B', SERIAL_MAP[our_play]))
+                maybe_write(our_play)
 
                 M['record']['games'] += 1
                 game_result = get_game_result(our_play, their_play)
 
                 print("I believe you played %s" % (FULL_PLAY[their_play].upper()))
-                if bot_connected:
-                    bot.write(struct.pack('>B', SERIAL_MAP['read' + FULL_PLAY[their_play].capitalize()]))
+                maybe_write('read' + FULL_PLAY[their_play].capitalize())
+
                 if game_result == 0:
                     print('Tie!')
                     game['tie'] += 1
@@ -574,10 +579,7 @@ def main():
                 if game['loss'] >= ROUNDS_TO_WIN or game['win'] >= ROUNDS_TO_WIN:
                 # if game['turn'] >= ROUNDS_TO_WIN:
                     maybe_sleep(TIME_BETWEEN_MOVES)
-                    print_divider()
-                    print("You won %.2f%% (%d / %d)" % (game['loss'] / game['turn'] * 100, game['loss'], game['turn']))
-                    print("We tied %.2f%% (%d / %d)" % (game['tie'] / game['turn'] * 100, game['tie'], game['turn']))
-                    print("You lost %.2f%% (%d / %d)" % (game['win'] / game['turn'] * 100, game['win'], game['turn']))
+                    print_results(game)
 
                     if DEBUG:
                         print(M['record'])
@@ -601,11 +603,8 @@ def main():
     except:
         raise
         maybe_sleep(TIME_BETWEEN_MOVES)
-        print_divider()
         if game['turn'] > 1:
-            print("You won %.2f%% (%d / %d)" % (game['loss'] / game['turn'] * 100, game['loss'], game['turn']))
-            print("We tied %.2f%% (%d / %d)" % (game['tie'] / game['turn'] * 100, game['tie'], game['turn']))
-            print("You lost %.2f%% (%d / %d)" % (game['win'] / game['turn'] * 100, game['win'], game['turn']))
+            print_results(game)
 
     finally:
         print("Thanks for playing!")
