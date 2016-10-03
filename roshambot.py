@@ -22,7 +22,7 @@ def str_to_bool(val): return val == 'True'
 
 MEMORY = 5
 INITIAL_WEIGHT = 1
-ROUNDS_TO_WIN = 3
+ROUNDS_TO_WIN = 1
 TIME_BETWEEN_MOVES = 2.5
 
 LOAD_FRESH = str_to_bool(os.environ.get("LOAD_FRESH"))
@@ -204,12 +204,14 @@ def maybe_sleep(duration):
     if LEAP_CONTROL:
         time.sleep(duration)
 
-def maybe_write(msg, connected):
+def maybe_write(msg):
+    print(msg, SERIAL_MAP[msg], BOT_CONNECTED)
+
     try:
-        if connected:
+        if BOT_CONNECTED:
             bot.write(struct.pack('>B', SERIAL_MAP[msg]))
     except:
-        return False
+        raise
 
 def dict_max(dict):
     best, best_val = '', 0
@@ -267,46 +269,45 @@ def get_fresh_model():
         'nn': []
     }
 
+if CONNECT_TO_ARDUINO:
+    try:
+        bot = serial.Serial(os.environ.get("SERIAL_PORT"), 9600, timeout=1)
+        BOT_CONNECTED = True
+    except:
+        print('Could not connect to Arduino.')
+        BOT_CONNECTED = False
+else:
+    BOT_CONNECTED = False
+
+if LEAP_CONTROL:
+    try:
+        listener = SampleListener()
+        controller = Leap.Controller()
+        controller.add_listener(listener)
+        leap_connected = True
+    except:
+        print('Could not connect to Leap controller.')
+        leap_connected = False
+else:
+    leap_connected = False
+
+if LOAD_FRESH:
+    M = get_fresh_model()
+else:
+    try:
+        M = cPickle.load(open(PICKLE_FILE, 'rb'))
+    except:
+        print('Could not load pickled model. Starting fresh.')
+        M = get_fresh_model()
+
 def main():
     try:
-        if CONNECT_TO_ARDUINO:
-            try:
-                bot = serial.Serial(os.environ.get("SERIAL_PORT"), 9600, timeout=1)
-                bot_connected = True
-            except:
-                print('Could not connect to Arduino.')
-                bot_connected = False
-        else:
-            bot_connected = False
-
-        if LEAP_CONTROL:
-            try:
-                listener = SampleListener()
-                controller = Leap.Controller()
-                controller.add_listener(listener)
-                leap_connected = True
-            except:
-                print('Could not connect to Leap controller.')
-                leap_connected = False
-        else:
-            leap_connected = False
-
-        if LOAD_FRESH:
-            M = get_fresh_model()
-        else:
-            try:
-                M = cPickle.load(open(PICKLE_FILE, 'rb'))
-            except:
-                print('Could not load pickled model. Starting fresh.')
-                M = get_fresh_model()
-
         first_run = True
 
         history = deque()
         char_map = {'left': 'r', 'up': 'p', 'right': 's'}
 
         while True:
-
             if not first_run:
                 print()
                 print()
@@ -322,6 +323,8 @@ def main():
             for key in ['win', 'tie', 'loss']:
                 game[key] = 0
             game['turn'] = 1
+
+            maybe_write('resetScores')
 
             print(DIVIDER)
             print()
@@ -393,19 +396,19 @@ def main():
                         print("On 3, throw " + FULL_PLAY[tutorial_move] + ".")
                         print()
 
-                        maybe_write('n', bot_connected)
+                        maybe_write('n')
                         time.sleep(1)
 
                         for i in range(3, 0, -1):
                             print(str(i) + '... ')
-                            maybe_write(COUNTDOWN_MAP[i], bot_connected)
+                            maybe_write(COUNTDOWN_MAP[i])
                             maybe_sleep(0.9)
 
                         print('THROW')
                         print()
 
-                        maybe_write(COUNTDOWN_MAP['throw'], bot_connected)
-                        maybe_write(tutorial_move, bot_connected)
+                        maybe_write(COUNTDOWN_MAP['throw'])
+                        maybe_write(tutorial_move)
 
                         # use a move dict to get an average to make sure we're reading the input correctly
                         move_history = {} # reset dict
@@ -472,11 +475,11 @@ def main():
             """
             while True:
 
-                maybe_write('n', bot_connected)
+                maybe_write('n')
 
                 # traverse history, updating weights (only if last game was not tie)
                 try:
-                    if game_result != 0:
+                    if len(history) > 0:
                         len_history = len(history)
                         nodes = list(history)
 
@@ -512,11 +515,11 @@ def main():
                 if leap_connected:
                     for i in range(3, 0, -1):
                         print(str(i) + '... ')
-                        maybe_write(COUNTDOWN_MAP[i], bot_connected)
+                        maybe_write(COUNTDOWN_MAP[i])
                         maybe_sleep(0.9)
 
                     print('THROW')
-                    maybe_write(COUNTDOWN_MAP['throw'], bot_connected)
+                    maybe_write(COUNTDOWN_MAP['throw'])
                     print()
 
                     # use a move dict to get an average to make sure we're reading the input correctly
@@ -531,7 +534,7 @@ def main():
 
                     if not len(move_history):
                         print('Could not read input, trying again...')
-                        maybe_write('readError', bot_connected)
+                        maybe_write('readError')
                         print_divider()
                         maybe_sleep(TIME_BETWEEN_MOVES)
                         print()
@@ -552,13 +555,13 @@ def main():
                 print(ASCII_ART[our_play])
                 print()
 
-                maybe_write(our_play, bot_connected)
+                maybe_write(our_play)
 
                 M['record']['games'] += 1
                 game_result = get_game_result(our_play, their_play)
 
                 print("I believe you played %s" % (FULL_PLAY[their_play].upper()))
-                maybe_write('read' + FULL_PLAY[their_play].capitalize(), bot_connected)
+                maybe_write('read' + FULL_PLAY[their_play].capitalize())
 
                 if game_result == 0:
                     print('Tie!')
@@ -567,10 +570,12 @@ def main():
                 elif game_result == -1:
                     print('You win!')
                     game['loss'] += 1
+                    maybe_write('incPlayerScore')
                     M['record']['loss'] += 1
                 elif game_result == 1:
                     print('I win!')
                     game['win'] += 1
+                    maybe_write('incBotScore')
                     M['record']['win'] += 1
 
                 print("Out of %d games, you've won %d, I've won %d, and we've tied %d times." % (game['turn'], game['loss'], game['win'], game['tie']))

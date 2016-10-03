@@ -194,6 +194,8 @@ void setup() {
   alpha4.clear();
   alpha4.writeDisplay();
 
+  displayScore(playerScore, botScore);
+
   upperFingers.attach(3);
   lowerFingers.attach(6);
   // thumb.attach(9);
@@ -240,7 +242,7 @@ void loop() {
       case 13:
         botScore++;
         break;
-      case 14;
+      case 14:
         // reset both scores
         playerScore = 0;
         botScore = 0;
