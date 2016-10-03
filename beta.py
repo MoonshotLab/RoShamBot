@@ -22,7 +22,7 @@ def str_to_bool(val): return val == 'True'
 
 MEMORY = 5
 INITIAL_WEIGHT = 1
-ROUNDS_TO_WIN = 1
+ROUNDS_TO_WIN = 3
 TIME_BETWEEN_MOVES = 2.5
 
 LOAD_FRESH = str_to_bool(os.environ.get("LOAD_FRESH"))
