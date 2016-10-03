@@ -1,7 +1,10 @@
 #include <Servo.h>
 
-Servo upperFingers, lowerFingers, thumb;
+Servo upperFingers, lowerFingers;
+// Servo thumb;
+
 int input;
+int pos = 0;    // variable to store the servo position
 
 int readScissorsPin = 22;
 int readPaperPin = 23;
@@ -12,58 +15,35 @@ int countTwoPin = 52;
 int countThreePin = 53;
 int countThrowPin = 50;
 
+int upperOpen = 10;
+int upperClosed = 150;
+int upperRest = 80;
 
-// digital scissors 21
-// digital paper 23
-// digital rock 24
-// digital error 25
-
-// 1     53
-// 2     51
-// 3     52
-// THROW 50
-
-
-// upper fingers open 170
-// upper fingers neutral 140
-// upper fingers closed 110
-
-// lower fingers open 120
-// lower fingers neutral 145
-// lower fingers closed 170
-
-// thumb open 150
-// thumb neutral 135
-// thumb closed 120
-
-
-int pos = 0;    // variable to store the servo position
+int lowerOpen = 170;
+int lowerClosed = 90;
+int lowerRest = 140;
 
 void playNeutral() {
-  upperFingers.write(160);
-  lowerFingers.write(160);
-  thumb.write(150);
+  upperFingers.write(upperRest);
+  lowerFingers.write(lowerRest);
   Serial.println("neutral");
 }
 
 void playRock() {
-  upperFingers.write(110);
-  lowerFingers.write(170);
-  thumb.write(120);
+  upperFingers.write(upperClosed);
+  lowerFingers.write(lowerClosed);
   Serial.println("playing rock");
 }
 
 void playPaper() {
-  upperFingers.write(170);
-  lowerFingers.write(120);
-  thumb.write(150);
+  upperFingers.write(upperOpen);
+  lowerFingers.write(lowerOpen);
   Serial.println("playing paper");
 }
 
 void playScissors() {
-  upperFingers.write(170);
-  lowerFingers.write(170);
-  thumb.write(120);
+  upperFingers.write(upperOpen);
+  lowerFingers.write(lowerClosed);
   Serial.println("playing scissors");
 }
 
@@ -188,16 +168,16 @@ void lightLed(int input) {
 }
 
 void setup() {
-//  exit(0);
+  exit(0);
   Serial.begin(9600);
 
   upperFingers.attach(3);
   lowerFingers.attach(6);
-  thumb.attach(9);
+  // thumb.attach(9);
 
-  upperFingers.write(170);
-  lowerFingers.write(120);
-  thumb.write(150);
+  upperFingers.write(upperRest);
+  lowerFingers.write(lowerRest);
+  // thumb.write(150);
 
   pinMode(readScissorsPin, OUTPUT);
   pinMode(readPaperPin, OUTPUT);
