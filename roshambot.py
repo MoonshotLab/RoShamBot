@@ -204,9 +204,9 @@ def maybe_sleep(duration):
     if LEAP_CONTROL:
         time.sleep(duration)
 
-def maybe_write(msg):
+def maybe_write(msg, connected):
     try:
-        if bot_connected:
+        if connected:
             bot.write(struct.pack('>B', SERIAL_MAP[msg]))
     except:
         return False
@@ -393,19 +393,19 @@ def main():
                         print("On 3, throw " + FULL_PLAY[tutorial_move] + ".")
                         print()
 
-                        maybe_write('n')
+                        maybe_write('n', bot_connected)
                         time.sleep(1)
 
                         for i in range(3, 0, -1):
                             print(str(i) + '... ')
-                            maybe_write(COUNTDOWN_MAP[i])
+                            maybe_write(COUNTDOWN_MAP[i], bot_connected)
                             maybe_sleep(0.9)
 
                         print('THROW')
                         print()
 
-                        maybe_write(COUNTDOWN_MAP['throw'])
-                        maybe_write(tutorial_move)
+                        maybe_write(COUNTDOWN_MAP['throw'], bot_connected)
+                        maybe_write(tutorial_move, bot_connected)
 
                         # use a move dict to get an average to make sure we're reading the input correctly
                         move_history = {} # reset dict
@@ -472,7 +472,7 @@ def main():
             """
             while True:
 
-                maybe_write('n')
+                maybe_write('n', bot_connected)
 
                 # traverse history, updating weights (only if last game was not tie)
                 try:
@@ -512,11 +512,11 @@ def main():
                 if leap_connected:
                     for i in range(3, 0, -1):
                         print(str(i) + '... ')
-                        maybe_write(COUNTDOWN_MAP[i])
+                        maybe_write(COUNTDOWN_MAP[i], bot_connected)
                         maybe_sleep(0.9)
 
                     print('THROW')
-                    maybe_write(COUNTDOWN_MAP['throw'])
+                    maybe_write(COUNTDOWN_MAP['throw'], bot_connected)
                     print()
 
                     # use a move dict to get an average to make sure we're reading the input correctly
@@ -531,7 +531,7 @@ def main():
 
                     if not len(move_history):
                         print('Could not read input, trying again...')
-                        maybe_write('readError')
+                        maybe_write('readError', bot_connected)
                         print_divider()
                         maybe_sleep(TIME_BETWEEN_MOVES)
                         print()
@@ -552,13 +552,13 @@ def main():
                 print(ASCII_ART[our_play])
                 print()
 
-                maybe_write(our_play)
+                maybe_write(our_play, bot_connected)
 
                 M['record']['games'] += 1
                 game_result = get_game_result(our_play, their_play)
 
                 print("I believe you played %s" % (FULL_PLAY[their_play].upper()))
-                maybe_write('read' + FULL_PLAY[their_play].capitalize())
+                maybe_write('read' + FULL_PLAY[their_play].capitalize(), bot_connected)
 
                 if game_result == 0:
                     print('Tie!')
