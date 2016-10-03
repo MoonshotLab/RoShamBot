@@ -22,9 +22,8 @@ def str_to_bool(val): return val == 'True'
 
 MEMORY = 5
 INITIAL_WEIGHT = 1
-ROUNDS_TO_WIN = 5
+ROUNDS_TO_WIN = 1
 TIME_BETWEEN_MOVES = 2.5
-FIRST_RUN = True
 
 LOAD_FRESH = str_to_bool(os.environ.get("LOAD_FRESH"))
 CONNECT_TO_ARDUINO = str_to_bool(os.environ.get("CONNECT_TO_ARDUINO"))
@@ -282,13 +281,14 @@ def main():
                 print('Could not load pickled model. Starting fresh.')
                 M = get_fresh_model()
 
+        first_run = True
 
         history = deque()
         char_map = {'left': 'r', 'up': 'p', 'right': 's'}
 
         while True:
 
-            if not FIRST_RUN:
+            if not first_run:
                 print()
                 print()
                 print()
@@ -297,6 +297,7 @@ def main():
                 print()
                 print()
                 print()
+                maybe_sleep(TIME_BETWEEN_MOVES)
 
             game = {}
             for key in ['win', 'tie', 'loss']:
@@ -369,7 +370,9 @@ def main():
 
                 for tutorial_move in tutorial_moves:
                     while True:
-                        print("On 3, throw " + FULL_PLAY[tutorial_move])
+                        print_divider()
+                        print("On 3, throw " + FULL_PLAY[tutorial_move] + ".")
+                        print()
 
                         if bot_connected:
                             bot.write(struct.pack('>B', SERIAL_MAP['n']))
@@ -385,6 +388,7 @@ def main():
                             maybe_sleep(0.9)
 
                         print('THROW')
+                        print()
 
                         if bot_connected:
                             bot.write(struct.pack('>B', SERIAL_MAP[COUNTDOWN_MAP['throw']]))
@@ -414,14 +418,12 @@ def main():
                         if their_play == tutorial_move:
                             print('Great!')
                             maybe_sleep(TIME_BETWEEN_MOVES)
-                            print()
                             break
                         else:
                             print("Sorry, I thought you played " + FULL_PLAY[their_play] + ". Let's try again.")
                             maybe_sleep(TIME_BETWEEN_MOVES)
-                            print()
                             continue
-                        print()
+                        print_divider()
 
             print()
             print("Now, let's play!")
@@ -462,30 +464,33 @@ def main():
                 if bot_connected:
                     bot.write(struct.pack('>B', SERIAL_MAP['n']))
 
-                # traverse history, updating weights
-                len_history = len(history)
-                nodes = list(history)
+                # traverse history, updating weights (only if last game was not tie)
+                try:
+                    if game_result != 0:
+                        len_history = len(history)
+                        nodes = list(history)
 
-                if len_history > len(M['nn']):
-                    M['nn'].append(dict())
+                        if len_history > len(M['nn']):
+                            M['nn'].append(dict())
 
+                        while len(nodes):
+                            # print(nodes)
+                            depth = len(nodes) - 1 # 1-based -> 0-based
+                            concatted_row = concat_row(nodes)
+                            concatted_row = concatted_row[::-1] # look backwards in history for most likely next play
 
-                while len(nodes):
-                    # print(nodes)
-                    depth = len(nodes) - 1 # 1-based -> 0-based
-                    concatted_row = concat_row(nodes)
-                    concatted_row = concatted_row[::-1] # look backwards in history for most likely next play
+                            if concatted_row in M['nn'][depth]:
+                                if DEBUG:
+                                    print('incrementing: ', concatted_row, ' to a val of ', M['nn'][depth][concatted_row])
+                                M['nn'][depth][concatted_row] += 1
+                            else:
+                                if DEBUG:
+                                    print('adding: ', concatted_row)
+                                M['nn'][depth][concatted_row] = 1
 
-                    if concatted_row in M['nn'][depth]:
-                        if DEBUG:
-                            print('incrementing: ', concatted_row, ' to a val of ', M['nn'][depth][concatted_row])
-                        M['nn'][depth][concatted_row] += 1
-                    else:
-                        if DEBUG:
-                            print('adding: ', concatted_row)
-                        M['nn'][depth][concatted_row] = 1
-
-                    nodes.pop()
+                            nodes.pop()
+                except:
+                    pass
 
                 print_divider()
                 guess = get_guess(history, M['nn'])
@@ -566,8 +571,9 @@ def main():
                 print("Out of %d games, you've won %d, I've won %d, and we've tied %d times." % (game['turn'], game['loss'], game['win'], game['tie']))
                 print_divider()
 
-                # if game['loss'] >= ROUNDS_TO_WIN or game['win'] >= ROUNDS_TO_WIN:
-                if game['turn'] >= ROUNDS_TO_WIN:
+                if game['loss'] >= ROUNDS_TO_WIN or game['win'] >= ROUNDS_TO_WIN:
+                # if game['turn'] >= ROUNDS_TO_WIN:
+                    maybe_sleep(TIME_BETWEEN_MOVES)
                     print_divider()
                     print("You won %.2f%% (%d / %d)" % (game['loss'] / game['turn'] * 100, game['loss'], game['turn']))
                     print("We tied %.2f%% (%d / %d)" % (game['tie'] / game['turn'] * 100, game['tie'], game['turn']))
@@ -579,10 +585,9 @@ def main():
                             print(model_level)
 
                     if REPLAY:
-                        FIRST_RUN = False
-                        continue
-                    else:
-                        break
+                        first_run = False
+
+                    break
 
                 history.appendleft(their_play)
 
@@ -595,6 +600,7 @@ def main():
 
     except:
         raise
+        maybe_sleep(TIME_BETWEEN_MOVES)
         print_divider()
         if game['turn'] > 1:
             print("You won %.2f%% (%d / %d)" % (game['loss'] / game['turn'] * 100, game['loss'], game['turn']))
