@@ -11,4 +11,3 @@ python-dateutil==2.5.3
 python-dotenv==0.6.0
 pytz==2016.6.1
 scipy==0.18.1
-six==1.10.0
