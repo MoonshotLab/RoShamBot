@@ -24,12 +24,14 @@ MEMORY = 5
 INITIAL_WEIGHT = 1
 ROUNDS_TO_WIN = 5
 TIME_BETWEEN_MOVES = 2.5
+FIRST_RUN = True
 
 LOAD_FRESH = str_to_bool(os.environ.get("LOAD_FRESH"))
 CONNECT_TO_ARDUINO = str_to_bool(os.environ.get("CONNECT_TO_ARDUINO"))
 PLAY_TUTORIAL = str_to_bool(os.environ.get("PLAY_TUTORIAL"))
 LEAP_CONTROL = str_to_bool(os.environ.get("LEAP_CONTROL"))
 DEBUG = str_to_bool(os.environ.get("DEBUG"))
+REPLAY = str_to_bool(os.environ.get("REPLAY"))
 
 PICKLE_FILE = 'model.pk'
 
@@ -284,84 +286,215 @@ def main():
         history = deque()
         char_map = {'left': 'r', 'up': 'p', 'right': 's'}
 
-        game = {}
-        for key in ['win', 'tie', 'loss']:
-            game[key] = 0
-        game['turn'] = 1
+        while True:
 
-        print(DIVIDER)
-        print()
-        print('Welcome to Roshambot 3000')
-        print_divider()
+            if not FIRST_RUN:
+                print()
+                print()
+                print()
+                print()
+                print()
+                print()
+                print()
+                print()
 
-        maybe_sleep(0.5)
+            game = {}
+            for key in ['win', 'tie', 'loss']:
+                game[key] = 0
+            game['turn'] = 1
 
-
-        """
-        WAIT TO BEGIN
-        """
-        if leap_connected:
-            print ('Hold your hand over the screen to begin.')
-            ready_frame_count = 0
-            while True:
-                if ready_frame_count >= 20:
-                    break
-
-                frame = controller.frame()
-
-                if len(frame.hands) > 0:
-                    ready_frame_count += 1
-                    sys.stdout.write('.')
-                    sys.stdout.flush()
-                    maybe_sleep(0.05)
-
-        print()
-        maybe_sleep(0.5)
-
-
-        """
-        TUTORIAL
-        """
-        if PLAY_TUTORIAL and leap_connected:
+            print(DIVIDER)
             print()
-            print("Let's run through a tutorial.")
-            maybe_sleep(1)
-            print("Hold your hand over the input device to play.")
-            maybe_sleep(1)
-            print("We'll count down from 3, and on 'THROW', play your move.")
-            print()
-            maybe_sleep(2)
+            print('Welcome to Roshambot 3000')
+            print_divider()
 
-            print ('Hold your hand over the screen when ready...')
-            # print()
-            ready_frame_count = 0
-            while True:
-                if ready_frame_count >= 20:
-                    print()
-                    break
+            maybe_sleep(0.5)
 
-                frame = controller.frame()
 
-                if len(frame.hands) > 0:
-                    ready_frame_count += 1
-                    sys.stdout.write('.')
-                    sys.stdout.flush()
-                    maybe_sleep(0.05)
-
-            print()
-            tutorial_repeat = 1
-            tutorial_moves = [choice for choice in CHOICES * tutorial_repeat]
-            maybe_sleep(1)
-
-            for tutorial_move in tutorial_moves:
+            """
+            WAIT TO BEGIN
+            """
+            if leap_connected:
+                print ('Hold your hand over the screen to begin.')
+                ready_frame_count = 0
                 while True:
-                    print("On 3, throw " + FULL_PLAY[tutorial_move])
+                    if ready_frame_count >= 20:
+                        break
 
-                    if bot_connected:
-                        bot.write(struct.pack('>B', SERIAL_MAP['n']))
+                    frame = controller.frame()
 
-                    time.sleep(1)
+                    if len(frame.hands) > 0:
+                        ready_frame_count += 1
+                        sys.stdout.write('.')
+                        sys.stdout.flush()
+                        maybe_sleep(0.05)
 
+            print()
+            maybe_sleep(0.5)
+
+
+            """
+            TUTORIAL
+            """
+            if PLAY_TUTORIAL and leap_connected:
+                print()
+                print("Let's run through a tutorial.")
+                maybe_sleep(1)
+                print("Hold your hand over the input device to play.")
+                maybe_sleep(1)
+                print("We'll count down from 3, and on 'THROW', play your move.")
+                print()
+                maybe_sleep(2)
+
+                print ('Hold your hand over the screen when ready...')
+                # print()
+                ready_frame_count = 0
+                while True:
+                    if ready_frame_count >= 20:
+                        print()
+                        break
+
+                    frame = controller.frame()
+
+                    if len(frame.hands) > 0:
+                        ready_frame_count += 1
+                        sys.stdout.write('.')
+                        sys.stdout.flush()
+                        maybe_sleep(0.05)
+
+                print()
+                tutorial_repeat = 1
+                tutorial_moves = [choice for choice in CHOICES * tutorial_repeat]
+                maybe_sleep(1)
+
+                for tutorial_move in tutorial_moves:
+                    while True:
+                        print("On 3, throw " + FULL_PLAY[tutorial_move])
+
+                        if bot_connected:
+                            bot.write(struct.pack('>B', SERIAL_MAP['n']))
+
+                        time.sleep(1)
+
+                        for i in range(3, 0, -1):
+                            print(str(i) + '... ')
+
+                            if bot_connected:
+                                bot.write(struct.pack('>B', SERIAL_MAP[COUNTDOWN_MAP[i]]))
+
+                            maybe_sleep(0.9)
+
+                        print('THROW')
+
+                        if bot_connected:
+                            bot.write(struct.pack('>B', SERIAL_MAP[COUNTDOWN_MAP['throw']]))
+
+                        if bot_connected:
+                            bot.write(struct.pack('>B', SERIAL_MAP[tutorial_move]))
+
+                        # use a move dict to get an average to make sure we're reading the input correctly
+                        move_history = {} # reset dict
+                        for i in range(20):
+                            move = listener.getMove(controller)
+                            if move:
+                                if move in move_history:
+                                    move_history[move] += 1
+                                else:
+                                    move_history[move] = 1
+
+                        if not len(move_history):
+                            print("Could not read input, let's again...")
+                            maybe_sleep(TIME_BETWEEN_MOVES)
+                            print()
+
+                            continue
+
+                        their_play = dict_max(move_history)
+
+                        if their_play == tutorial_move:
+                            print('Great!')
+                            maybe_sleep(TIME_BETWEEN_MOVES)
+                            print()
+                            break
+                        else:
+                            print("Sorry, I thought you played " + FULL_PLAY[their_play] + ". Let's try again.")
+                            maybe_sleep(TIME_BETWEEN_MOVES)
+                            print()
+                            continue
+                        print()
+
+            print()
+            print("Now, let's play!")
+            time.sleep(1)
+            print("We'll play best of %d." % ROUNDS_TO_WIN)
+            time.sleep(1)
+            print("On the count of 3, throw your move!")
+            time.sleep(1)
+            print("Good luck!")
+            time.sleep(2)
+            print()
+            if leap_connected:
+                print ('Hold your hand over the screen when ready...')
+                ready_frame_count = 0
+                while True:
+                    if ready_frame_count >= 20:
+                        break
+
+                    frame = controller.frame()
+
+                    if len(frame.hands) > 0:
+                        ready_frame_count += 1
+                        sys.stdout.write('.')
+                        sys.stdout.flush()
+                        maybe_sleep(0.05)
+            else:
+                raw_input("Press Enter to continue.")
+
+            maybe_sleep(0.5)
+            print()
+
+
+            """
+            LET'S PLAY
+            """
+            while True:
+
+                if bot_connected:
+                    bot.write(struct.pack('>B', SERIAL_MAP['n']))
+
+                # traverse history, updating weights
+                len_history = len(history)
+                nodes = list(history)
+
+                if len_history > len(M['nn']):
+                    M['nn'].append(dict())
+
+
+                while len(nodes):
+                    # print(nodes)
+                    depth = len(nodes) - 1 # 1-based -> 0-based
+                    concatted_row = concat_row(nodes)
+                    concatted_row = concatted_row[::-1] # look backwards in history for most likely next play
+
+                    if concatted_row in M['nn'][depth]:
+                        if DEBUG:
+                            print('incrementing: ', concatted_row, ' to a val of ', M['nn'][depth][concatted_row])
+                        M['nn'][depth][concatted_row] += 1
+                    else:
+                        if DEBUG:
+                            print('adding: ', concatted_row)
+                        M['nn'][depth][concatted_row] = 1
+
+                    nodes.pop()
+
+                print_divider()
+                guess = get_guess(history, M['nn'])
+                our_play = BEATS[guess]
+
+                print("ROUND %d" % game['turn'])
+                time.sleep(1)
+
+                if leap_connected:
                     for i in range(3, 0, -1):
                         print(str(i) + '... ')
 
@@ -369,14 +502,10 @@ def main():
                             bot.write(struct.pack('>B', SERIAL_MAP[COUNTDOWN_MAP[i]]))
 
                         maybe_sleep(0.9)
-
                     print('THROW')
-
                     if bot_connected:
                         bot.write(struct.pack('>B', SERIAL_MAP[COUNTDOWN_MAP['throw']]))
-
-                    if bot_connected:
-                        bot.write(struct.pack('>B', SERIAL_MAP[tutorial_move]))
+                    print()
 
                     # use a move dict to get an average to make sure we're reading the input correctly
                     move_history = {} # reset dict
@@ -389,190 +518,80 @@ def main():
                                 move_history[move] = 1
 
                     if not len(move_history):
-                        print("Could not read input, let's again...")
+                        print('Could not read input, trying again...')
+                        if bot_connected:
+                            bot.write(struct.pack('>B', SERIAL_MAP['readError']))
+                        print_divider()
                         maybe_sleep(TIME_BETWEEN_MOVES)
                         print()
-
                         continue
 
                     their_play = dict_max(move_history)
-
-                    if their_play == tutorial_move:
-                        print('Great!')
-                        maybe_sleep(TIME_BETWEEN_MOVES)
-                        print()
-                        break
-                    else:
-                        print("Sorry, I thought you played " + FULL_PLAY[their_play] + ". Let's try again.")
-                        maybe_sleep(TIME_BETWEEN_MOVES)
-                        print()
-                        continue
-                    print()
-
-        print()
-        print("Now, let's play!")
-        time.sleep(1)
-        print("We'll play best of %d." % ROUNDS_TO_WIN)
-        time.sleep(1)
-        print("On the count of 3, throw your move!")
-        time.sleep(1)
-        print("Good luck!")
-        time.sleep(2)
-        print()
-        if leap_connected:
-            print ('Hold your hand over the screen when ready...')
-            ready_frame_count = 0
-            while True:
-                if ready_frame_count >= 20:
-                    break
-
-                frame = controller.frame()
-
-                if len(frame.hands) > 0:
-                    ready_frame_count += 1
-                    sys.stdout.write('.')
-                    sys.stdout.flush()
-                    maybe_sleep(0.05)
-        else:
-            raw_input("Press Enter to continue.")
-
-        maybe_sleep(0.5)
-        print()
-
-
-        """
-        LET'S PLAY
-        """
-        while True:
-
-            if bot_connected:
-                bot.write(struct.pack('>B', SERIAL_MAP['n']))
-
-            # traverse history, updating weights
-            len_history = len(history)
-            nodes = list(history)
-
-            if len_history > len(M['nn']):
-                M['nn'].append(dict())
-
-
-            while len(nodes):
-                # print(nodes)
-                depth = len(nodes) - 1 # 1-based -> 0-based
-                concatted_row = concat_row(nodes)
-                concatted_row = concatted_row[::-1] # look backwards in history for most likely next play
-
-                if concatted_row in M['nn'][depth]:
-                    if DEBUG:
-                        print('incrementing: ', concatted_row, ' to a val of ', M['nn'][depth][concatted_row])
-                    M['nn'][depth][concatted_row] += 1
                 else:
-                    if DEBUG:
-                        print('adding: ', concatted_row)
-                    M['nn'][depth][concatted_row] = 1
+                    char = get_char()
+                    their_play = char_map[char]
 
-                nodes.pop()
+                    if char == "down" or char == False:
+                        break
+                # print(their_play)
+                # print(move_history)
 
-            print_divider()
-            guess = get_guess(history, M['nn'])
-            our_play = BEATS[guess]
 
-            print("ROUND %d" % game['turn'])
-            time.sleep(1)
-
-            if leap_connected:
-                for i in range(3, 0, -1):
-                    print(str(i) + '... ')
-
-                    if bot_connected:
-                        bot.write(struct.pack('>B', SERIAL_MAP[COUNTDOWN_MAP[i]]))
-
-                    maybe_sleep(0.9)
-                print('THROW')
-                if bot_connected:
-                    bot.write(struct.pack('>B', SERIAL_MAP[COUNTDOWN_MAP['throw']]))
+                print("I guessed you'd play %s so I'll play %s" % (FULL_PLAY[guess].upper(), FULL_PLAY[our_play].upper()))
+                print(ASCII_ART[our_play])
                 print()
 
-                # use a move dict to get an average to make sure we're reading the input correctly
-                move_history = {} # reset dict
-                for i in range(20):
-                    move = listener.getMove(controller)
-                    if move:
-                        if move in move_history:
-                            move_history[move] += 1
-                        else:
-                            move_history[move] = 1
+                if bot_connected:
+                    bot.write(struct.pack('>B', SERIAL_MAP[our_play]))
 
-                if not len(move_history):
-                    print('Could not read input, trying again...')
-                    if bot_connected:
-                        bot.write(struct.pack('>B', SERIAL_MAP['readError']))
-                    print_divider()
-                    maybe_sleep(TIME_BETWEEN_MOVES)
-                    print()
-                    continue
+                M['record']['games'] += 1
+                game_result = get_game_result(our_play, their_play)
 
-                their_play = dict_max(move_history)
-            else:
-                char = get_char()
-                their_play = char_map[char]
+                print("I believe you played %s" % (FULL_PLAY[their_play].upper()))
+                if bot_connected:
+                    bot.write(struct.pack('>B', SERIAL_MAP['read' + FULL_PLAY[their_play].capitalize()]))
+                if game_result == 0:
+                    print('Tie!')
+                    game['tie'] += 1
+                    M['record']['tie'] += 1
+                elif game_result == -1:
+                    print('You win!')
+                    game['loss'] += 1
+                    M['record']['loss'] += 1
+                elif game_result == 1:
+                    print('I win!')
+                    game['win'] += 1
+                    M['record']['win'] += 1
 
-                if char == "down" or char == False:
-                    break
-            # print(their_play)
-            # print(move_history)
-
-
-            print("I guessed you'd play %s so I'll play %s" % (FULL_PLAY[guess].upper(), FULL_PLAY[our_play].upper()))
-            print(ASCII_ART[our_play])
-            print()
-
-            if bot_connected:
-                bot.write(struct.pack('>B', SERIAL_MAP[our_play]))
-
-            M['record']['games'] += 1
-            game_result = get_game_result(our_play, their_play)
-
-            print("I believe you played %s" % (FULL_PLAY[their_play].upper()))
-            if bot_connected:
-                bot.write(struct.pack('>B', SERIAL_MAP['read' + FULL_PLAY[their_play].capitalize()]))
-            if game_result == 0:
-                print('Tie!')
-                game['tie'] += 1
-                M['record']['tie'] += 1
-            elif game_result == -1:
-                print('You win!')
-                game['loss'] += 1
-                M['record']['loss'] += 1
-            elif game_result == 1:
-                print('I win!')
-                game['win'] += 1
-                M['record']['win'] += 1
-
-            print("Out of %d games, you've won %d, I've won %d, and we've tied %d times." % (game['turn'], game['loss'], game['win'], game['tie']))
-            print_divider()
-
-            # if game['loss'] >= ROUNDS_TO_WIN or game['win'] >= ROUNDS_TO_WIN:
-            if game['turn'] >= ROUNDS_TO_WIN:
+                print("Out of %d games, you've won %d, I've won %d, and we've tied %d times." % (game['turn'], game['loss'], game['win'], game['tie']))
                 print_divider()
-                print("You won %.2f%% (%d / %d)" % (game['loss'] / game['turn'] * 100, game['loss'], game['turn']))
-                print("We tied %.2f%% (%d / %d)" % (game['tie'] / game['turn'] * 100, game['tie'], game['turn']))
-                print("You lost %.2f%% (%d / %d)" % (game['win'] / game['turn'] * 100, game['win'], game['turn']))
 
-                if DEBUG:
-                    print(M['record'])
-                    for model_level in M['nn']:
-                        print(model_level)
-                break
+                # if game['loss'] >= ROUNDS_TO_WIN or game['win'] >= ROUNDS_TO_WIN:
+                if game['turn'] >= ROUNDS_TO_WIN:
+                    print_divider()
+                    print("You won %.2f%% (%d / %d)" % (game['loss'] / game['turn'] * 100, game['loss'], game['turn']))
+                    print("We tied %.2f%% (%d / %d)" % (game['tie'] / game['turn'] * 100, game['tie'], game['turn']))
+                    print("You lost %.2f%% (%d / %d)" % (game['win'] / game['turn'] * 100, game['win'], game['turn']))
 
-            history.appendleft(their_play)
+                    if DEBUG:
+                        print(M['record'])
+                        for model_level in M['nn']:
+                            print(model_level)
 
-            while len(history) > MEMORY:
-                history.pop()
+                    if REPLAY:
+                        FIRST_RUN = False
+                        continue
+                    else:
+                        break
 
-            game['turn'] += 1
-            maybe_sleep(TIME_BETWEEN_MOVES)
-            print()
+                history.appendleft(their_play)
+
+                while len(history) > MEMORY:
+                    history.pop()
+
+                game['turn'] += 1
+                maybe_sleep(TIME_BETWEEN_MOVES)
+                print()
 
     except:
         raise
