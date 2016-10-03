@@ -1,9 +1,16 @@
 #include <Servo.h>
+#include <Wire.h>
+#include "Adafruit_LEDBackpack.h"
+#include "Adafruit_GFX.h"
+
+Adafruit_AlphaNum4 alpha4 = Adafruit_AlphaNum4();
 
 Servo upperFingers, lowerFingers;
 // Servo thumb;
 
-int input;
+int playerScore = 0;
+int botScore = 0;
+
 int pos = 0;    // variable to store the servo position
 
 int readScissorsPin = 22;
@@ -167,9 +174,25 @@ void lightLed(int input) {
   }
 }
 
+void displayScore(int playerScore, int botScore) {
+  // convert to chars
+  char playerScoreChar = playerScore + '0';
+  char botScoreChar = botScore + '0';
+
+  alpha4.writeDigitAscii(0, playerScoreChar); // convert to char
+  alpha4.writeDigitAscii(1, ' ');
+  alpha4.writeDigitAscii(2, ' ');
+  alpha4.writeDigitAscii(3, botScoreChar); // covert to char
+  alpha4.writeDisplay();
+}
+
 void setup() {
-  exit(0);
+  // exit(0);
   Serial.begin(9600);
+
+  alpha4.begin(0x70);  // pass in the address
+  alpha4.clear();
+  alpha4.writeDisplay();
 
   upperFingers.attach(3);
   lowerFingers.attach(6);
@@ -200,16 +223,31 @@ void loop() {
     digitalWrite(countThreePin, LOW);
     digitalWrite(countThrowPin, LOW);
   };
-  input = Serial.read();
+
+  int input = Serial.read();
 
   Serial.println(input);
 
   if (input >= 0 && input < 4) {
     playMove(input);
   } else if (input >= 4 && input < 12) {
-    // throw leds
     lightLed(input);
-  }
+  } else if (input >= 12 && input < 15) {
+    switch(input) {
+      case 12:
+        playerScore++;
+        break;
+      case 13:
+        botScore++;
+        break;
+      case 14;
+        // reset both scores
+        playerScore = 0;
+        botScore = 0;
+        break;
+    }
 
+    displayScore(playerScore, botScore);
+  }
 //  delay(1000);
 }
