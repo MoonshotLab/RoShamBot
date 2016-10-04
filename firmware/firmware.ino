@@ -24,7 +24,7 @@ int countThreePin = 53;
 int countThrowPin = 50;
 
 int neoPin = 0;
-int neoLength = 50;
+int neoLength = 48;
 int halfNeoLength = neoLength / 2;
 
 int upperOpen = 10;
@@ -43,7 +43,7 @@ Servo upperFingers, lowerFingers;
 Adafruit_AlphaNum4 alpha4 = Adafruit_AlphaNum4();
 
 // ring strips
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(neoLength, neoPin, NEO_GRB + NEO_KHZ800); // GRB, not RGB!
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(neoLength, 6, NEO_GRB + NEO_KHZ800); // GRB, not RGB!
 
 void playNeutral() {
   upperFingers.write(upperRest);
@@ -88,43 +88,80 @@ void playMove(int input) {
   }
 }
 
+void wipe() {
+  for (int i = 0; i < neoLength; i++) {
+    strip.setPixelColor(i, 0);
+  }
+
+  strip.show();
+}
+
+void lightNeoThird(int segment) {
+  wipe();
+
+  segment = segment % 3;
+  int blue = strip.Color(0, 0, 255);
+
+  for (int i = 0; i < halfNeoLength / 3; i++) {
+    int pos = (halfNeoLength / 3 * segment) + i;
+    strip.setPixelColor(pos, blue);
+  }
+
+  strip.show();
+}
+
+void readRock() {
+  lightNeoThird(0);
+}
+
+void readPaper() {
+  lightNeoThird(1);
+}
+void readScissors() {
+  lightNeoThird(2);
+}
+
+
 void lightLed(int input) {
   switch(input) {
     case 4:
       // read scissors
-      digitalWrite(readScissorsPin, HIGH);
-      digitalWrite(readPaperPin, LOW);
-      digitalWrite(readRockPin, LOW);
-      digitalWrite(readErrorPin, LOW);
-      digitalWrite(countOnePin, LOW);
-      digitalWrite(countTwoPin, LOW);
-      digitalWrite(countThreePin, LOW);
-      digitalWrite(countThrowPin, LOW);
-      delay(2500);
+      // digitalWrite(readScissorsPin, HIGH);
+      // digitalWrite(readPaperPin, LOW);
+      // digitalWrite(readRockPin, LOW);
+      // digitalWrite(readErrorPin, LOW);
+      // digitalWrite(countOnePin, LOW);
+      // digitalWrite(countTwoPin, LOW);
+      // digitalWrite(countThreePin, LOW);
+      // digitalWrite(countThrowPin, LOW);
+      // delay(2500);
+      readScissors();
       break;
     case 5:
       // read paper
-      digitalWrite(readScissorsPin, LOW);
-      digitalWrite(readPaperPin, HIGH);
-      digitalWrite(readRockPin, LOW);
-      digitalWrite(readErrorPin, LOW);
-      digitalWrite(countOnePin, LOW);
-      digitalWrite(countTwoPin, LOW);
-      digitalWrite(countThreePin, LOW);
-      digitalWrite(countThrowPin, LOW);
-      delay(2500);
+      // digitalWrite(readScissorsPin, LOW);
+      // digitalWrite(readPaperPin, HIGH);
+      // digitalWrite(readRockPin, LOW);
+      // digitalWrite(readErrorPin, LOW);
+      // digitalWrite(countOnePin, LOW);
+      // digitalWrite(countTwoPin, LOW);
+      // digitalWrite(countThreePin, LOW);
+      // digitalWrite(countThrowPin, LOW);
+      // delay(2500);
+      readPaper();
       break;
     case 6:
       // read rock
-      digitalWrite(readScissorsPin, LOW);
-      digitalWrite(readPaperPin, LOW);
-      digitalWrite(readRockPin, HIGH);
-      digitalWrite(readErrorPin, LOW);
-      digitalWrite(countOnePin, LOW);
-      digitalWrite(countTwoPin, LOW);
-      digitalWrite(countThreePin, LOW);
-      digitalWrite(countThrowPin, LOW);
-      delay(2500);
+      // digitalWrite(readScissorsPin, LOW);
+      // digitalWrite(readPaperPin, LOW);
+      // digitalWrite(readRockPin, HIGH);
+      // digitalWrite(readErrorPin, LOW);
+      // digitalWrite(countOnePin, LOW);
+      // digitalWrite(countTwoPin, LOW);
+      // digitalWrite(countThreePin, LOW);
+      // digitalWrite(countThrowPin, LOW);
+      // delay(2500);
+      readRock();
       break;
     case 7:
       // read error
@@ -285,6 +322,19 @@ void setup() {
   pinMode(countTwoPin, OUTPUT);
   pinMode(countThreePin, OUTPUT);
   pinMode(countThrowPin, OUTPUT);
+}
+
+void loop1() {
+  for (int i = 0; i < neoLength; i++) {
+    strip.setPixelColor(i, 255, 0, 0);
+  }
+  strip.show();
+  delay(500);
+  for (int i = 0; i < neoLength; i++) {
+    strip.setPixelColor(i, 255, 255, 0);
+  }
+  strip.show();
+  delay(500);
 }
 
 void loop() {
