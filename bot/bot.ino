@@ -252,13 +252,13 @@ void neoCountdown() {
   delay(1000);
 }
 
-void glowLoop(int baseColor) {
+void glowLoop() {
   neoWipe();
 
   // set all pixels to white
   for (int i = 0; i < halfNeoLength; i++) {
-    strip.setPixelColor(i, strip.Color(255));
-    strip.setPixelColor(i + halfNeoLength, strip.Color(255));
+    strip.setPixelColor(i, strip.Color(255, 255, 255));
+    strip.setPixelColor(i + halfNeoLength, strip.Color(255, 255, 255));
   }
 
   while (currentMode == 0) {
@@ -338,3 +338,4 @@ void loop() {
   }
 //  delay(1000);
 }
+
