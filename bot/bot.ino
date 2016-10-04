@@ -259,17 +259,22 @@ void glowLoop() {
   int step = 10;
 
   while (currentMode == 0) {
-    for (int i = 0; i < halfNeoLength; i++) {
       // glo up
-      for (alpha = 0; alpha < step; alpha++) {
+    for (alpha = 0; alpha < step; alpha++) {
+      for (int i = 0; i < halfNeoLength; i++) {
         color = strip.Color(255, 255, 255, 255 / step * alpha);
 
         strip.setPixelColor(i, color);
         strip.setPixelColor(i + halfNeoLength, color);
       }
 
-      // glo down
-      for (alpha = step; alpha > 0; alpha--) {
+      strip.show();
+      delay(100);
+    }
+
+    // glo down
+    for (alpha = step; alpha > 0; alpha--) {
+      for (int i = 0; i < halfNeoLength; i++) {
         color = strip.Color(255, 255, 255, 255 / step * alpha);
 
         strip.setPixelColor(i, color);
