@@ -150,7 +150,7 @@ void readPlayerScissors(bool wipe) {
 }
 
 void readPlayerError(bool wipe) {
-  lightPlayerRing(strip.Color(0, 255, 0), true, wipe); // red
+  lightPlayerRing(strip.Color(0, 255, 0), wipe); // red
 }
 
 
@@ -174,19 +174,19 @@ void lightNeoRing(int input) {
       break;
     case 8:
       // count 1
-      countdownOne();
+      // countdownOne();
       break;
     case 9:
       // count 2
-      countdownTwo();
+      // countdownTwo();
       break;
     case 10:
       // count 3
-      countdownThree();
+      // countdownThree();
       break;
     case 11:
       // count throw
-      countdownThrow();
+      // countdownThrow();
       break;
   }
 }
