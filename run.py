@@ -75,6 +75,7 @@ class SampleListener(Leap.Listener):
             return False
 
     def on_frame(self, controller):
+        global current_play
         frame = controller.frame()
 
         if len(frame.hands):
@@ -83,30 +84,30 @@ class SampleListener(Leap.Listener):
             if num_fingers in [0, 2, 4, 5]:
                 if num_fingers == 0:
                     # rock
-                    if CURRENT_PLAY != 'rock':
+                    if current_play != 'rock':
                         maybe_write('readRock')
-                        CURRENT_PLAY = 'rock'
+                        current_play = 'rock'
                 elif num_fingers == 2:
                     # scissors
-                    if CURRENT_PLAY != 'scissors':
+                    if current_play != 'scissors':
                         maybe_write('readScissors')
-                        CURRENT_PLAY = 'scissors'
+                        current_play = 'scissors'
                 elif num_fingers in [4, 5]:
                     #paper
-                    if CURRENT_PLAY != 'paper':
+                    if current_play != 'paper':
                         maybe_write('readPaper')
-                        CURRENT_PLAY = 'paper'
-                elif CURRENT_PLAY != None:
+                        current_play = 'paper'
+                elif current_play != None:
                     maybe_write('clearPlay')
-                    CURRENT_PLAY = None
-            elif CURRENT_PLAY != None:
+                    current_play = None
+            elif current_play != None:
                 maybe_write('clearPlay')
-                CURRENT_PLAY = None
+                current_play = None
 
         else:
-            if CURRENT_PLAY != None:
+            if current_play != None:
                 maybe_write('clearPlay')
-                CURRENT_PLAY = None
+                current_play = None
 
 # ['p', 'r', 's'] => 'prs'
 def concat_row(lst):
@@ -268,7 +269,7 @@ else:
         print('Could not load pickled model. Starting fresh.')
         M = get_fresh_model()
 
-CURRENT_PLAY = None
+current_play = None
 
 def mainBak():
     try:
