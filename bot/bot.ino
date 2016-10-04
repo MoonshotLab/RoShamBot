@@ -14,6 +14,8 @@ int currentMode;
 int playerScore = 0;
 int botScore = 0;
 
+int readyCount = 0; // fill ring to start game
+
 int pos = 0;    // variable to store the servo position
 int upperFingersPin = 7;
 int lowerFingersPin = 8;
@@ -21,6 +23,7 @@ int lowerFingersPin = 8;
 #define NEOPIN 6
 int neoLength = 42;
 int halfNeoLength = neoLength / 2;
+int userPixelOffset = 2;
 
 int upperOpen = 10;
 int upperClosed = 150;
@@ -76,7 +79,7 @@ void playMove(int input) {
       playScissors();
       break;
     case 3:
-       playNeutral();
+      playNeutral();
       break;
      default:
        exit(0);
@@ -255,10 +258,10 @@ void neoCountdown() {
 void rainbowCycle(uint8_t wait) {
   uint16_t i, j;
 
-  while (currentMode == 0) {
+  while (true) {
     for(j=0; j<256; j++) { // 5 cycles of all colors on wheel
       for(i = 0; i < halfNeoLength; i++) {
-        strip.setPixelColor(i + 2, Wheel(((i * 256 / strip.numPixels()) + j) & 255));
+        strip.setPixelColor(i + userPixelOffset, Wheel(((i * 256 / strip.numPixels()) + j) & 255));
       }
       strip.show();
       delay(wait);
@@ -280,6 +283,24 @@ uint32_t Wheel(byte WheelPos) {
   }
   WheelPos -= 170;
   return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+}
+
+void displayFillRing() {
+  neoWipe();
+
+  int steps = 20;
+  float fillPct = halfNeoLength / steps * readyCount;
+
+  if (readyCount > 0) {
+    for (int i = 0; i < fillPct; i++) {
+      strip.setPixelColor(i + userPixelOffset, strip.Color(255, 255, 255));
+    }
+    strip.show();
+  }
+}
+
+void botHandTest() {
+  //
 }
 
 void setup() {
@@ -332,9 +353,30 @@ void loop() {
   } else if (input == 15) {
     // clear display
     neoWipe();
-  } if (input == 16) {
+  } else if (input == 16) {
     currentMode = 0;
     rainbowCycle(20);
+  } else if (input >= 17 && input < 19) {
+    currentMode = 1;
+    switch(input) {
+      case 17:
+        // fill ring inc
+        readyCount++;
+        break;
+      case 18:
+        // fill ring dec
+        readyCount--;
+
+        if (readyCount == 0) {
+          currentMode = 1;
+          rainbowCycle(20);
+        }
+        break;
+    }
+
+    displayFillRing();
+  } else if (input == 19) {
+    // botHandTest();
   }
 //  delay(1000);
 }

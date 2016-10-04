@@ -18,10 +18,13 @@ def main():
                 print FULL_PLAY[move]
                 bot.write(struct.pack('>B', INT_PLAY[move]))
                 time.sleep(2)
+
+                bot.write(struct.pack('>B', INT_PLAY['n']))
+                time.sleep(2)
     except:
         raise
     finally:
-        bot.write(struct.pack('>B', 3)) 
+        bot.write(struct.pack('>B', 3))
         bot.close()
 
 if __name__ == "__main__":

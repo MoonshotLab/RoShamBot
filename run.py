@@ -42,7 +42,9 @@ SERIAL_MAP = {
     'countOne': 8, 'countTwo': 9, 'countThree': 10, 'countThrow': 11,
     'incPlayerScore': 12, 'incBotScore': 13, 'resetScores': 14,
     'clearPlay': 15,
-    'glowLoop': 16
+    'glowLoop': 16,
+    'fillRingInc': 17, 'fillRingDec': 18,
+    'botHandTest': 19,
 }
 DIVIDER = "=" * 80
 COUNTDOWN_MAP = {1: 'countOne', 2: 'countTwo', 3: 'countThree', 'throw': 'countThrow'}
@@ -73,40 +75,40 @@ class SampleListener(Leap.Listener):
         else:
             return False
 
-    def on_frame(self, controller):
-        global current_play
-        frame = controller.frame()
-
-        if len(frame.hands):
-            num_fingers = len(frame.fingers.extended())
-
-            if num_fingers in [0, 2, 4, 5]:
-                if num_fingers == 0:
-                    # rock
-                    if current_play != 'rock':
-                        bot_write('readRock')
-                        current_play = 'rock'
-                elif num_fingers == 2:
-                    # scissors
-                    if current_play != 'scissors':
-                        bot_write('readScissors')
-                        current_play = 'scissors'
-                elif num_fingers in [4, 5]:
-                    #paper
-                    if current_play != 'paper':
-                        bot_write('readPaper')
-                        current_play = 'paper'
-                elif current_play != False:
-                    bot_write('readError')
-                    current_play = False
-            elif current_play != False:
-                bot_write('readError')
-                current_play = False
-
-        else:
-            if current_play != None:
-                bot_write('clearPlay')
-                current_play = None
+    # def on_frame(self, controller):
+    #     global current_play
+    #     frame = controller.frame()
+    #
+    #     if len(frame.hands):
+    #         num_fingers = len(frame.fingers.extended())
+    #
+    #         if num_fingers in [0, 2, 4, 5]:
+    #             if num_fingers == 0:
+    #                 # rock
+    #                 if current_play != 'rock':
+    #                     bot_write('readRock')
+    #                     current_play = 'rock'
+    #             elif num_fingers == 2:
+    #                 # scissors
+    #                 if current_play != 'scissors':
+    #                     bot_write('readScissors')
+    #                     current_play = 'scissors'
+    #             elif num_fingers in [4, 5]:
+    #                 #paper
+    #                 if current_play != 'paper':
+    #                     bot_write('readPaper')
+    #                     current_play = 'paper'
+    #             elif current_play != False:
+    #                 bot_write('readError')
+    #                 current_play = False
+    #         elif current_play != False:
+    #             bot_write('readError')
+    #             current_play = False
+    #
+    #     else:
+    #         if current_play != None:
+    #             bot_write('clearPlay')
+    #             current_play = None
 
 # ['p', 'r', 's'] => 'prs'
 def concat_row(lst):
@@ -163,10 +165,11 @@ def get_concatted_history(history, depth):
 
 def bot_write(msg):
     if DEBUG:
-        print(msg, SERIAL_MAP[msg], BOT_CONNECTED)
+        print(msg, SERIAL_MAP[msg])
 
     try:
         bot.write(struct.pack('>B', SERIAL_MAP[msg]))
+
     except:
         raise
 
@@ -176,6 +179,7 @@ def bot_write_raw(msg):
 
     try:
         bot.write(struct.pack('>B', msg))
+
     except:
         raise
 
@@ -567,28 +571,10 @@ def mainBak():
         # pickle graph
         cPickle.dump(M, open(PICKLE_FILE, 'wb'))
 
-def main2():
-    try:
-        sys.stdin.readline()
-    except KeyboardInterrupt:
-        pass
-
-def main3():
-    while True:
-        for i in range(5):
-            bot_write('incPlayerScore')
-            time.sleep(1)
-            bot_write('incBotScore')
-            time.sleep(1)
-        bot_write('resetScores')
-        time.sleep(1)
-
-def main():
+def mainTest():
     while True:
         msg = int(raw_input('Send: '))
         bot_write_raw(msg)
-
-current_play = None
 
 try:
     bot = serial.Serial(os.environ.get("SERIAL_PORT"), 9600, timeout=1)
@@ -614,20 +600,48 @@ else:
         print('Could not load pickled model. Starting fresh.')
         M = get_fresh_model()
 
-def mainReal():
+current_play = None
+
+def main():
 
     while True:
-        pass
         # pregame glow
+        current_mode = 0
+        bot_write('glowLoop')
 
         # hold -> fill ring
-        # bot hand test + countdown * 1
+        ready_count = 0
+        ready_limit = 20
+        while True:
+            if ready_count >= ready_limit:
+                break
+
+            frame = controller.frame()
+
+            if len(frame.hands) > 0:
+                if current_mode != 1:
+                    current_mode = 1
+
+                bot_write('fillRingInc')
+                ready_count += 1
+                time.sleep(0.05)
+            else:
+                if ready_count > 0:
+                    bot_write('fillRingDec')
+                    ready_count -= 1
+                    time.sleep(0.05)
+
+        # # bot hand test + countdown * 1
+        bot_write('botHandTest')
+        # time.sleep(2)
+
         # countdown
         # play
         # win / loss
         # score update
         # game loop
         # winner flash green
+        break
 
 
 if __name__ == "__main__":
