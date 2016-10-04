@@ -361,6 +361,7 @@ void loop() {
   } else if (input == 15) {
     // clear display
     neoWipe();
+    currentMode = -1;
   } else if (input == 16) {
     currentMode = 0;
     rainbowCycle(20);
