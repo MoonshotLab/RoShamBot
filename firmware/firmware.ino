@@ -1,12 +1,13 @@
 #include <Servo.h>
+
 #include <Wire.h>
 #include "Adafruit_LEDBackpack.h"
 #include "Adafruit_GFX.h"
 
-Adafruit_AlphaNum4 alpha4 = Adafruit_AlphaNum4();
-
-Servo upperFingers, lowerFingers;
-// Servo thumb;
+#include <Adafruit_NeoPixel.h>
+#ifdef __AVR__
+  #include <avr/power.h>
+#endif
 
 int playerScore = 0;
 int botScore = 0;
@@ -22,6 +23,10 @@ int countTwoPin = 52;
 int countThreePin = 53;
 int countThrowPin = 50;
 
+int neoPin = 0;
+int neoLength = 50;
+int halfNeoLength = neoLength / 2;
+
 int upperOpen = 10;
 int upperClosed = 150;
 int upperRest = 80;
@@ -29,6 +34,16 @@ int upperRest = 80;
 int lowerOpen = 170;
 int lowerClosed = 90;
 int lowerRest = 140;
+
+// hand servos
+Servo upperFingers, lowerFingers;
+// Servo thumb;
+
+// score display
+Adafruit_AlphaNum4 alpha4 = Adafruit_AlphaNum4();
+
+// ring strips
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(neoLength, neoPin, NEO_GRB + NEO_KHZ800); // GRB, not RGB!
 
 void playNeutral() {
   upperFingers.write(upperRest);
@@ -186,6 +201,61 @@ void displayScore(int playerScore, int botScore) {
   alpha4.writeDisplay();
 }
 
+void neoWipe() {
+  for (int i = 0; i < neoLength; i++) {
+    strip.setPixelColor(i, 0);
+  }
+
+  strip.show();
+}
+
+void playerOneWin() {
+  neoWipe();
+
+  for (int i = 0; i < halfNeoLength; i++) {
+    uint32_t green = strip.Color(255, 0, 0);
+    uint32_t red = strip.Color(0, 255, 0);
+
+    strip.setPixelColor(i, red);
+    strip.setPixelColor(i + 24, green);
+  }
+
+  strip.show();
+  delay(2000);
+}
+
+void playerTwoWin() {
+  neoWipe();
+
+  for (int i = 0; i < halfNeoLength; i++) {
+    uint32_t green = strip.Color(255, 0, 0);
+    uint32_t red = strip.Color(0, 255, 0);
+
+    strip.setPixelColor(i, green);
+    strip.setPixelColor(i + halfNeoLength, red);
+  }
+
+  strip.show();
+  delay(2000);
+}
+
+void neoCountdown() {
+  neoWipe();
+
+  for (int i = 0; i < halfNeoLength; i++) {
+    uint32_t blue = strip.Color(0, 0, 255);
+    strip.setPixelColor(i, blue);
+    strip.setPixelColor(i + halfNeoLength, blue);
+    if (i != 0 && i % (halfNeoLength / 3) == 0) {
+      strip.show();
+      delay(1000);
+    }
+  }
+
+  strip.show();
+  delay(1000);
+}
+
 void setup() {
   // exit(0);
   Serial.begin(9600);
@@ -195,6 +265,9 @@ void setup() {
   alpha4.writeDisplay();
 
   displayScore(playerScore, botScore);
+
+  strip.begin();
+  strip.show(); // Initialize all pixels to 'off'
 
   upperFingers.attach(3);
   lowerFingers.attach(6);

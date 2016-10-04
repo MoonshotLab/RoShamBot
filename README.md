@@ -6,6 +6,7 @@
 * Arduino Libraries
     * Adafruit [LED Backpack library](https://github.com/adafruit/Adafruit-LED-Backpack-Library/archive/master.zip)
     * Adafruit [GFX Library](https://github.com/adafruit/Adafruit-GFX-Library/archive/master.zip)
+    * Adafruit [NeoPixel Library](https://github.com/adafruit/Adafruit_NeoPixel/archive/master.zip)
 * Leap Motion
     * [Desktop SDK](https://developer.leapmotion.com/v2)
     * Other libraries, as per https://api.leapmotion.com/documentation/python/devguide/Project_Setup.html
