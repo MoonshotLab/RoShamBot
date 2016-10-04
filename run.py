@@ -599,11 +599,11 @@ def main2():
 
 def main():
     for i in range(5):
-        maybe_write(12)
+        maybe_write('incPlayerScore')
         time.sleep(1000)
-        maybe_write(13)
+        maybe_write('incBotScore')
         time.sleep(1000)
-        maybe_write(14)
+        maybe_write('resetScores')
         time.sleep(1000)
 
 
