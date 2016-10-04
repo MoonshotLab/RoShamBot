@@ -97,12 +97,12 @@ class SampleListener(Leap.Listener):
                     if current_play != 'paper':
                         maybe_write('readPaper')
                         current_play = 'paper'
-                elif current_play != None:
-                    maybe_write('clearPlay')
-                    current_play = None
-            elif current_play != None:
-                maybe_write('clearPlay')
-                current_play = None
+                elif current_play != False:
+                    maybe_write('readError')
+                    current_play = False
+            elif current_play != False:
+                maybe_write('readError')
+                current_play = False
 
         else:
             if current_play != None:
