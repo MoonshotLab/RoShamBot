@@ -300,7 +300,15 @@ void displayFillRing() {
 }
 
 void botHandTest() {
-  //
+  neoWipe();
+}
+
+void playerWinsOverall() {
+  neoWipe();
+}
+
+void botWinsOverall() {
+  neoWipe();
 }
 
 void setup() {
@@ -376,7 +384,11 @@ void loop() {
 
     displayFillRing();
   } else if (input == 19) {
-    // botHandTest();
+    botHandTest();
+  } else if (input == 20) {
+    playerWinsOverall();
+  } else if (input == 21) {
+    botWinsOverall();
   }
 //  delay(1000);
 }

@@ -45,8 +45,9 @@ SERIAL_MAP = {
     'glowLoop': 16,
     'fillRingInc': 17, 'fillRingDec': 18,
     'botHandTest': 19,
+    'playerWins': 20, 'botWins': 21
 }
-DIVIDER = "=" * 80
+
 COUNTDOWN_MAP = {1: 'countOne', 2: 'countTwo', 3: 'countThree', 'throw': 'countThrow'}
 
 class SampleListener(Leap.Listener):
@@ -571,10 +572,14 @@ def mainBak():
         # pickle graph
         cPickle.dump(M, open(PICKLE_FILE, 'wb'))
 
-def mainTest():
+def main():
     while True:
         msg = int(raw_input('Send: '))
-        bot_write_raw(msg)
+        for key in SERIAL_MAP:
+            if SERIAL_MAP[key] == msg:
+                print(msg, key)
+                bot_write_raw(msg)
+                break
 
 try:
     bot = serial.Serial(os.environ.get("SERIAL_PORT"), 9600, timeout=1)
@@ -602,14 +607,14 @@ else:
 
 current_play = None
 
-def main():
-
+def mainReal():
+    # can't stop won't stop
     while True:
-        # pregame glow
+        # enticing glow
         current_mode = 0
         bot_write('glowLoop')
 
-        # hold -> fill ring
+        # user hand -> fill ring -> start game
         ready_count = 0
         ready_limit = 20
         while True:
@@ -631,16 +636,126 @@ def main():
                     ready_count -= 1
                     time.sleep(0.05)
 
-        # # bot hand test + countdown * 1
+        # bot hand test + countdown * 1
         bot_write('botHandTest')
-        # time.sleep(2)
+        # time.sleep(5) ?
 
-        # countdown
-        # play
-        # win / loss
-        # score update
+        # reset game vars
+        game = {}
+        for key in ['win', 'tie', 'loss']:
+            game[key] = 0
+        game['turn'] = 1
+        game['history'] = deque()
+
+        bot_write('resetScores')
+
         # game loop
-        # winner flash green
+        while True:
+            # neutral bot pose
+            bot_write('n')
+
+            # traverse history, updating weights (only if last game was not tie)
+            if len(game['history']) > 0 and current_play != 'invalid':
+                len_history = len(game['history'])
+                nodes = list(game['history'])
+
+                # build up neural net if depth not present
+                if len_history > len(M['nn']):
+                    M['nn'].append(dict())
+
+                while len(nodes):
+                    depth = len(nodes) - 1 # 1-based -> 0-based
+
+                    concatted_row = concat_row(nodes)
+                    concatted_row = concatted_row[::-1] # look backwards in history for most likely next play
+
+                    if concatted_row in M['nn'][depth]:
+                        if DEBUG:
+                            print('incrementing: ', concatted_row, ' to a val of ', M['nn'][depth][concatted_row])
+
+                        M['nn'][depth][concatted_row] += 1
+                    else:
+                        if DEBUG:
+                            print('adding: ', concatted_row)
+
+                        M['nn'][depth][concatted_row] = 1
+
+                    nodes.pop() # pop off
+
+            # come up with our play
+            guess = get_guess(game['history'], M['nn']) # what we guess they'll play
+            bot_move = BEATS[guess] # what'll beat it
+
+            # countdown
+            for i in range(3, 0, -1):
+                bot_write(COUNTDOWN_MAP[i])
+                time.sleep(0.9)
+
+            # throw
+            bot_write(COUNTDOWN_MAP['throw'])
+
+            # use a move dict to get an average to make sure we're reading the input correctly
+            move_history = {} # reset dict
+            for i in range(50):
+                move = listener.getMove(controller)
+                if move:
+                    if move in move_history:
+                        move_history[move] += 1
+                    else:
+                        move_history[move] = 1
+
+            # no input
+            if not len(move_history):
+                bot_write('readError')
+                time.sleep(TIME_BETWEEN_MOVES)
+                continue
+
+            # most frequent input
+            player_move = dict_max(move_history)
+
+            # play bot move
+            bot_write(bot_move)
+
+            # increment total number of games played by this model
+            M['record']['games'] += 1
+
+            # see who won
+            game_result = get_game_result(bot_move, player_move)
+
+            if game_result == 0: # tie
+                game['tie'] += 1
+                M['record']['tie'] += 1
+            elif game_result == -1: # bot loses / player wins
+                game['loss'] += 1
+                M['record']['loss'] += 1
+                bot_write('incPlayerScore')
+            elif game_result == 1: # bot wins / player loses
+                game['win'] += 1
+                M['record']['win'] += 1
+                bot_write('incBotScore')
+
+            if game['loss'] >= ROUNDS_TO_WIN or game['win'] >= ROUNDS_TO_WIN:
+                if DEBUG:
+                    print(M['record'])
+                    for model_level in M['nn']:
+                        print(model_level)
+
+                # flash winner
+                if game['loss'] >= ROUNDS_TO_WIN:
+                    bot_write('playerWins')
+
+                if game['win'] >= ROUNDS_TO_WIN:
+                    bot_write('botWins')
+
+                break
+
+            game['history'].appendLeft(player_move)
+
+            while len(game['history']) > MEMORY:
+                history.pop()
+
+            game['turn'] += 1
+            time.sleep(TIME_BETWEEN_MOVES)
         break
 
 
