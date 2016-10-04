@@ -25,8 +25,8 @@ int neoLength = 42;
 int halfNeoLength = neoLength / 2;
 int userPixelOffset = 2;
 
-int upperOpen = 150;
-int upperClosed = 65;
+int upperOpen = 85;
+int upperClosed = 0;
 int upperRest = (upperOpen + upperClosed) / 2;
 
 int lowerOpen = 0;
