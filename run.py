@@ -83,30 +83,30 @@ class SampleListener(Leap.Listener):
             if num_fingers in [0, 2, 4, 5]:
                 if num_fingers == 0:
                     # rock
-                    if current_play != 'rock':
+                    if CURRENT_PLAY != 'rock':
                         maybe_write('readRock')
-                        current_play = 'rock'
+                        CURRENT_PLAY = 'rock'
                 elif num_fingers == 2:
                     # scissors
-                    if current_play != 'scissors':
+                    if CURRENT_PLAY != 'scissors':
                         maybe_write('readScissors')
-                        current_play = 'scissors'
+                        CURRENT_PLAY = 'scissors'
                 elif num_fingers in [4, 5]:
                     #paper
-                    if current_play != 'paper':
+                    if CURRENT_PLAY != 'paper':
                         maybe_write('readPaper')
-                        current_play = 'paper'
-                elif current_play != None:
+                        CURRENT_PLAY = 'paper'
+                elif CURRENT_PLAY != None:
                     maybe_write('clearPlay')
-                    current_play = None
-            elif current_play != None:
+                    CURRENT_PLAY = None
+            elif CURRENT_PLAY != None:
                 maybe_write('clearPlay')
-                current_play = None
+                CURRENT_PLAY = None
 
         else:
-            if current_play != None:
+            if CURRENT_PLAY != None:
                 maybe_write('clearPlay')
-                current_play = None
+                CURRENT_PLAY = None
 
 # ['p', 'r', 's'] => 'prs'
 def concat_row(lst):
@@ -268,7 +268,7 @@ else:
         print('Could not load pickled model. Starting fresh.')
         M = get_fresh_model()
 
-current_play = None
+CURRENT_PLAY = None
 
 def mainBak():
     try:
