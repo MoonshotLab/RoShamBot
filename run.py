@@ -591,11 +591,20 @@ def mainBak():
         # pickle graph
         cPickle.dump(M, open(PICKLE_FILE, 'wb'))
 
-def main():
+def main2():
     try:
         sys.stdin.readline()
     except KeyboardInterrupt:
         pass
+
+def main():
+    for i in range(5):
+        maybe_write(12)
+        time.sleep(1000)
+        maybe_write(13)
+        time.sleep(1000)
+        maybe_write(14)
+        time.sleep(1000)
 
 
 if __name__ == "__main__":
