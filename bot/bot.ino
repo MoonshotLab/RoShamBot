@@ -81,7 +81,7 @@ void playMove(int input) {
   }
 }
 
-void wipe() {
+void neoWipe() {
   for (int i = 0; i < neoLength; i++) {
     strip.setPixelColor(i, 0);
   }
@@ -106,7 +106,7 @@ void botWipe() {
 }
 
 void lightPlayerThird(int segment, int color, bool wipe) {
-  if (wipe) wipe();
+  if (wipe) neoWipe();
 
   segment = segment % 3;
 
@@ -119,7 +119,7 @@ void lightPlayerThird(int segment, int color, bool wipe) {
 }
 
 void lightPlayerRing(int color, bool wipe) {
-  if (wipe) wipe();
+  if (wipe) neoWipe();
 
   for (int i = 0; i < halfNeoLength; i++) {
     strip.setPixelColor(i, color);
@@ -129,7 +129,7 @@ void lightPlayerRing(int color, bool wipe) {
 }
 
 void lightBotRing(int color, bool wipe) {
-  if (wipe) wipe();
+  if (wipe) neoWipe();
 
   for (int i = 0; i < halfNeoLength; i++) {
     strip.setPixelColor(halfNeoLength + i, color);
@@ -310,7 +310,7 @@ void loop() {
     displayScore(playerScore, botScore);
   } else if (input == 15) {
     // clear display
-    wipe();
+    neoWipe();
   }
 //  delay(1000);
 }
