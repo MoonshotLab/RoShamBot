@@ -17,21 +17,21 @@ int botScore = 0;
 int readyCount = 0; // fill ring to start game
 
 int pos = 0;    // variable to store the servo position
-int upperFingersPin = 7;
-int lowerFingersPin = 8;
+int upperFingersPin = 8;
+int lowerFingersPin = 7;
 
 #define NEOPIN 6
 int neoLength = 42;
 int halfNeoLength = neoLength / 2;
 int userPixelOffset = 2;
 
-int upperOpen = 10;
-int upperClosed = 150;
-int upperRest = 80;
+int upperOpen = 150;
+int upperClosed = 65;
+int upperRest = (upperOpen + upperClosed) / 2;
 
-int lowerOpen = 170;
-int lowerClosed = 90;
-int lowerRest = 140;
+int lowerOpen = 0;
+int lowerClosed = 85;
+int lowerRest = (lowerOpen + lowerClosed) / 2;
 
 // hand servos
 Servo upperFingers, lowerFingers;
