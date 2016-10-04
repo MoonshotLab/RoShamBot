@@ -9,6 +9,8 @@
   #include <avr/power.h>
 #endif
 
+int currentMode;
+
 int playerScore = 0;
 int botScore = 0;
 
@@ -250,6 +252,35 @@ void neoCountdown() {
   delay(1000);
 }
 
+void glowLoop(int baseColor) {
+  neoWipe();
+
+  // set all pixels to white
+  for (int i = 0; i < halfNeoLength; i++) {
+    strip.setPixelColor(i, strip.Color(255));
+    strip.setPixelColor(i + halfNeoLength, strip.Color(255));
+  }
+
+  while (currentMode == 0) {
+    int alpha;
+    int step = 10;
+
+    // glo up
+    for (alpha = 0; alpha < step; alpha++) {
+      strip.setBrightness(255 / step * alpha);
+      strip.show();
+      delay(100);
+    }
+
+    // glo down
+    for (alpha = step; alpha > 0; alpha--) {
+      strip.setBrightness(255 / step * alpha);
+      strip.show();
+      delay(100);
+    }
+  }
+}
+
 void setup() {
   // exit(0);
   Serial.begin(9600);
@@ -265,20 +296,9 @@ void setup() {
 
   upperFingers.attach(upperFingersPin);
   lowerFingers.attach(lowerFingersPin);
-  // thumb.attach(9);
 
   upperFingers.write(upperRest);
   lowerFingers.write(lowerRest);
-  // thumb.write(150);
-
-  // pinMode(readScissorsPin, OUTPUT);
-  // pinMode(readPaperPin, OUTPUT);
-  // pinMode(readRockPin, OUTPUT);
-  // pinMode(readErrorPin, OUTPUT);
-  // pinMode(countOnePin, OUTPUT);
-  // pinMode(countTwoPin, OUTPUT);
-  // pinMode(countThreePin, OUTPUT);
-  // pinMode(countThrowPin, OUTPUT);
 }
 
 void loop() {
@@ -311,6 +331,10 @@ void loop() {
   } else if (input == 15) {
     // clear display
     neoWipe();
+  } if (input == 16) {
+    // glow loop
+    currentMode = 0;
+    glowLoop();
   }
 //  delay(1000);
 }
