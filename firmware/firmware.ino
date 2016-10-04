@@ -373,6 +373,9 @@ void loop() {
     }
 
     displayScore(playerScore, botScore);
+  } else if (input == 15) {
+    // clear display
+    wipe();
   }
 //  delay(1000);
 }

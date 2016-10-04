@@ -42,7 +42,8 @@ SERIAL_MAP = {
     'r': 0, 'p': 1, 's': 2, 'n': 3,
     'readScissors': 4, 'readPaper': 5, 'readRock': 6, 'readError': 7,
     'countOne': 8, 'countTwo': 9, 'countThree': 10, 'countThrow': 11,
-    'incPlayerScore': 12, 'incBotScore': 13, 'resetScores': 14
+    'incPlayerScore': 12, 'incBotScore': 13, 'resetScores': 14,
+    'clearPlay': 15,
 }
 DIVIDER = "=" * 80
 COUNTDOWN_MAP = {1: 'countOne', 2: 'countTwo', 3: 'countThree', 'throw': 'countThrow'}
@@ -76,19 +77,36 @@ class SampleListener(Leap.Listener):
     def on_frame(self, controller):
         frame = controller.frame()
 
-        if frame.id % 15 == 0 and len(frame.hands):
+        if len(frame.hands):
             num_fingers = len(frame.fingers.extended())
 
             if num_fingers in [0, 2, 4, 5]:
                 if num_fingers == 0:
-                    maybe_write('readRock')
-                    # time.sleep(100)
+                    # rock
+                    if current_play != 'rock':
+                        maybe_write('readRock')
+                        current_play = 'rock'
                 elif num_fingers == 2:
-                    maybe_write('readScissors')
-                    # time.sleep(100)
+                    # scissors
+                    if current_play != 'scissors':
+                        maybe_write('readScissors')
+                        current_play = 'scissors'
                 elif num_fingers in [4, 5]:
-                    maybe_write('readPaper')
-                    # time.sleep(100)
+                    #paper
+                    if current_play != 'paper':
+                        maybe_write('readPaper')
+                        current_play = 'paper'
+                elif current_play != None:
+                    maybe_write('clearPlay')
+                    current_play = None
+            elif current_play != None:
+                maybe_write('clearPlay')
+                current_play = None
+
+        else:
+            if current_play != None:
+                maybe_write('clearPlay')
+                current_play = None
 
 # ['p', 'r', 's'] => 'prs'
 def concat_row(lst):
@@ -249,6 +267,8 @@ else:
     except:
         print('Could not load pickled model. Starting fresh.')
         M = get_fresh_model()
+
+current_play = None
 
 def mainBak():
     try:
