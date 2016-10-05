@@ -538,21 +538,39 @@ void botHandIntro() {
   delay(timingDelay);
 }
 
-void playerVictory() {
-  ;
-}
-
-void botVictory() {
-  ;
-}
-
-void playerWinsOverall() {
+void playerVictor(bool playerWon, uint32_t c, uint8_t wait) {
   neoWipe();
+
+  for (int j=0; j<10; j++) {  //do 10 cycles of chasing
+    for (int q=0; q < 3; q++) {
+      if (playerWon) {
+        for (uint16_t i=0; i < halfNeoLength; i = i + 3) {
+          strip.setPixelColor(i + userPixelOffset + q, c); //turn every third pixel on
+        }
+        strip.show();
+
+        delay(wait);
+
+        for (uint16_t i=0; i < halfNeoLength; i = i + 3) {
+          strip.setPixelColor(i + userPixelOffset + q, 0); //turn every third pixel off
+        }
+      } else {
+        // bot won
+        for (uint16_t i=0; i < halfNeoLength; i = i + 3) {
+          strip.setPixelColor(i + botPixelOffset + q, c); //turn every third pixel on
+        }
+        strip.show();
+
+        delay(wait);
+
+        for (uint16_t i=0; i < halfNeoLength; i = i + 3) {
+          strip.setPixelColor(i + botPixelOffset + q, 0); //turn every third pixel off
+        }
+      }
+    }
+  }
 }
 
-void botWinsOverall() {
-  neoWipe();
-}
 
 void setup() {
   // exit(0);
@@ -642,9 +660,9 @@ void loop() {
   } else if (input == 21) {
     // botWinsOverall(); // remove
   } else if (input == 22) {
-    playerVictory();
+    playerVictor(true, green, 20);
   } else if (input == 23) {
-    botVictory();
+    playerVictor(false, green, 20);
   } else if (input >= 24 && input < 27) {
     switch(input) {
       case 24:

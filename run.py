@@ -577,7 +577,7 @@ def mainBak():
         # pickle graph
         cPickle.dump(M, open(PICKLE_FILE, 'wb'))
 
-def mainTest():
+def main():
     while True:
         msg = int(raw_input('Send: '))
         for key in SERIAL_MAP:
@@ -612,9 +612,11 @@ else:
 
 current_play = None
 
-def main():
+def mainReal():
     # can't stop won't stop
     while True:
+        bot_write('clearPlay')
+
         # enticing glow
         current_mode = 0
         bot_write('glowLoop')
