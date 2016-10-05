@@ -212,6 +212,8 @@ void readPlayerScissors(int res, bool wipe) {
 
 void readPlayerError(bool wipe) {
   lightPlayerRing(red, wipe);
+  delay(500);
+  Serial.write("errorDone");
 }
 
 void countdownOne(bool user) {
@@ -677,11 +679,11 @@ void loop() {
   } else if (input == 22) {
     playerVictor(true, green, 20);
     delay(250);
-    Serial.write("playerVictorDone");
+    Serial.write("victoryDone");
   } else if (input == 23) {
     playerVictor(false, green, 20);
     delay(250);
-    Serial.write("botVictorDone");
+    Serial.write("victoryDone");
   } else if (input >= 24 && input < 27) {
     switch(input) {
       case 24:

@@ -245,25 +245,6 @@ def main():
             current_mode = 0
             bot_write('glowLoop')
 
-            # wait for start from arduino
-            print('prewait')
-            local_timeout_count = 0
-            while True:
-                print(local_timeout_count)
-                if local_timeout_count >= TIMEOUT_LENGTH:
-                    break
-
-                bytes_to_read = bot.inWaiting()
-                data = bot.read(bytes_to_read)
-
-                if (data):
-                    print('data' + str(data))
-                    break
-
-                local_timeout_count += 1
-                time.sleep(0.1)
-            print('postwait')
-
             # user hand -> fill ring -> start game
             ready_count = 0
             ready_limit = 20
@@ -302,7 +283,7 @@ def main():
                 bytes_to_read = bot.inWaiting()
                 data = bot.read(bytes_to_read)
 
-                if (data):
+                if (data == "introDone"):
                     print('data' + str(data))
                     break
 
@@ -324,7 +305,7 @@ def main():
             # game loop
             while True:
                 time.sleep(TIME_BETWEEN_MOVES)
-                
+
                 # neutral bot pose
                 bot_write('n')
                 bot_write('clearPlay')
@@ -340,7 +321,7 @@ def main():
                     bytes_to_read = bot.inWaiting()
                     data = bot.read(bytes_to_read)
 
-                    if (data):
+                    if (data == "wipeDone"):
                         print('data' + str(data))
                         break
 
@@ -418,7 +399,7 @@ def main():
                     bytes_to_read = bot.inWaiting()
                     data = bot.read(bytes_to_read)
 
-                    if (data):
+                    if (data == "throwDone"):
                         print('data' + str(data))
                         break
 
@@ -441,6 +422,25 @@ def main():
                     bot_write('readError')
                     player_move = False
                     invalid_play_count += 1
+
+                    # wait for start from arduino
+                    print('prewait')
+                    local_timeout_count = 0
+                    while True:
+                        print(local_timeout_count)
+                        if local_timeout_count >= TIMEOUT_LENGTH:
+                            break
+
+                        bytes_to_read = bot.inWaiting()
+                        data = bot.read(bytes_to_read)
+
+                        if (data == "errorDone"):
+                            print('data' + str(data))
+                            break
+
+                        local_timeout_count += 1
+                        time.sleep(0.1)
+                    print('postwait')
 
                     if invalid_play_count >= 5:
                         break
@@ -466,7 +466,7 @@ def main():
                     bytes_to_read = bot.inWaiting()
                     data = bot.read(bytes_to_read)
 
-                    if (data):
+                    if (data == "moveDone"):
                         print('data' + str(data))
                         break
 
@@ -515,7 +515,7 @@ def main():
                     bytes_to_read = bot.inWaiting()
                     data = bot.read(bytes_to_read)
 
-                    if (data):
+                    if (data == "botResultDone"):
                         print('data' + str(data))
                         break
 
@@ -544,6 +544,25 @@ def main():
                     game['history'].pop()
 
                 game['turn'] += 1
+
+                # wait for start from arduino
+                print('prewait')
+                local_timeout_count = 0
+                while True:
+                    print(local_timeout_count)
+                    if local_timeout_count >= TIMEOUT_LENGTH:
+                        break
+
+                    bytes_to_read = bot.inWaiting()
+                    data = bot.read(bytes_to_read)
+
+                    if (data == "victoryDone"):
+                        print('data' + str(data))
+                        break
+
+                    local_timeout_count += 1
+                    time.sleep(0.1)
+                print('postwait')
             # break
     except:
         raise
