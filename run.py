@@ -452,6 +452,9 @@ def main():
                 # most frequent input
                 player_move = dict_max(move_history)
 
+                print('player played ' + player_move)
+                print('bot played ' + bot_move)
+
                 # play bot move
                 bot_write(bot_move)
 
@@ -536,6 +539,24 @@ def main():
                     if game['win'] >= ROUNDS_TO_WIN:
                         bot_write('botVictory')
 
+                    # wait for start from arduino
+                    print('waiting for victoryDone')
+                    local_timeout_count = 0
+                    while True:
+                        print(local_timeout_count)
+                        if local_timeout_count >= TIMEOUT_LENGTH:
+                            break
+
+                        bytes_to_read = bot.inWaiting()
+                        data = bot.read(bytes_to_read)
+
+                        if (data == "victoryDone"):
+                            print('data' + str(data))
+                            break
+
+                        local_timeout_count += 1
+                        time.sleep(0.1)
+                    print('postwait')
                     break
 
                 game['history'].appendleft(player_move)
@@ -544,25 +565,6 @@ def main():
                     game['history'].pop()
 
                 game['turn'] += 1
-
-                # wait for start from arduino
-                print('waiting for victoryDone')
-                local_timeout_count = 0
-                while True:
-                    print(local_timeout_count)
-                    if local_timeout_count >= TIMEOUT_LENGTH:
-                        break
-
-                    bytes_to_read = bot.inWaiting()
-                    data = bot.read(bytes_to_read)
-
-                    if (data == "victoryDone"):
-                        print('data' + str(data))
-                        break
-
-                    local_timeout_count += 1
-                    time.sleep(0.1)
-                print('postwait')
             # break
     except:
         raise

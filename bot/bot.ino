@@ -678,12 +678,21 @@ void loop() {
     // playerWinsOverall(); // remove
   } else if (input == 21) {
     // botWinsOverall(); // remove
-  } else if (input == 22) {
-    playerVictor(true, green, 20);
-    delay(250);
-    Serial.write("victoryDone");
-  } else if (input == 23) {
-    playerVictor(false, green, 20);
+  } else if (input == 22 || input == 23) {
+    switch(input) {
+      case 22:
+        // player wins
+        playerVictor(true, green, 20);
+        break;
+      case 23:
+        // bot wins
+        playerVictor(false, green, 20);
+        break;
+    }
+
+    playerScore = 0;
+    botScore = 0;
+
     delay(250);
     Serial.write("victoryDone");
   } else if (input >= 24 && input < 27) {
