@@ -767,7 +767,7 @@ def main():
 
                 break
 
-            game['history'].appendLeft(player_move)
+            game['history'].appendleft(player_move)
 
             while len(game['history']) > MEMORY:
                 game['history'].pop()
