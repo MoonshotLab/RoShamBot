@@ -50,6 +50,7 @@ SERIAL_MAP = {
     'playerWinRock': 24, 'playerTieRock': 25, 'playerLoseRock': 26,
     'playerWinPaper': 27, 'playerTiePaper': 28, 'playerLosePaper': 29,
     'playerWinScissors': 30, 'playerTieScissors': 31, 'playerLoseScissors': 32,
+    'botWin': 33, 'botTie': 34, 'botLose': 35
 }
 
 COUNTDOWN_MAP = {1: 'countOne', 2: 'countTwo', 3: 'countThree', 'throw': 'countThrow'}
@@ -576,7 +577,7 @@ def mainBak():
         # pickle graph
         cPickle.dump(M, open(PICKLE_FILE, 'wb'))
 
-def main():
+def mainTest():
     while True:
         msg = int(raw_input('Send: '))
         for key in SERIAL_MAP:
@@ -611,7 +612,7 @@ else:
 
 current_play = None
 
-def mainReal():
+def main():
     # can't stop won't stop
     while True:
         # enticing glow
@@ -627,22 +628,24 @@ def mainReal():
 
             frame = controller.frame()
 
+            sleep_timing = 0.1
+
             if len(frame.hands) > 0:
                 if current_mode != 1:
                     current_mode = 1
 
                 bot_write('fillRingInc')
                 ready_count += 1
-                time.sleep(0.05)
+                time.sleep(sleep_timing)
             else:
                 if ready_count > 0:
                     bot_write('fillRingDec')
                     ready_count -= 1
-                    time.sleep(0.05)
+                    time.sleep(sleep_timing)
 
         # bot hand test + countdown * 1
         bot_write('botHandTest')
-        # time.sleep(5) ?
+        time.sleep(5)
 
         # reset game vars
         game = {}
@@ -655,8 +658,10 @@ def mainReal():
 
         # game loop
         while True:
+            break
             # neutral bot pose
             bot_write('n')
+            bot_write('clearPlay')
 
             # traverse history, updating weights (only if last game was not tie)
             if len(game['history']) > 0 and current_play != 'invalid':
@@ -729,14 +734,23 @@ def mainReal():
             if game_result == 0: # tie
                 game['tie'] += 1
                 M['record']['tie'] += 1
+
+                bot_write('playerTie' + FULL_PLAY[player_move].capitalize())
+                bot_write('botTie')
             elif game_result == -1: # bot loses / player wins
                 game['loss'] += 1
                 M['record']['loss'] += 1
+
+                bot_write('playerWin' + FULL_PLAY[player_move].capitalize())
                 bot_write('incPlayerScore')
+                bot_write('botLose')
             elif game_result == 1: # bot wins / player loses
                 game['win'] += 1
                 M['record']['win'] += 1
+
+                bot_write('playerLose' + FULL_PLAY[player_move].capitalize())
                 bot_write('incBotScore')
+                bot_write('botWin')
 
             if game['loss'] >= ROUNDS_TO_WIN or game['win'] >= ROUNDS_TO_WIN:
                 if DEBUG:

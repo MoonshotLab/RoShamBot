@@ -521,6 +521,14 @@ void botHandIntro() {
   delay(timingDelay);
 }
 
+void playerVictory() {
+  ;
+}
+
+void botVictory() {
+  ;
+}
+
 void playerWinsOverall() {
   neoWipe();
 }
@@ -613,13 +621,13 @@ void loop() {
     currentMode = 2;
     botHandIntro();
   } else if (input == 20) {
-    playerWinsOverall();
+    // playerWinsOverall(); // remove
   } else if (input == 21) {
-    botWinsOverall();
+    // botWinsOverall(); // remove
   } else if (input == 22) {
-    lightPlayerRing(green, true);
+    playerVictory();
   } else if (input == 23) {
-    lightBotRing(green, true);
+    botVictory();
   } else if (input >= 24 && input < 27) {
     switch(input) {
       case 24:
@@ -663,6 +671,21 @@ void loop() {
       case 32:
         // player lose scissors
         readPlayerScissors(-1, true);
+        break;
+    }
+  } else if (input >= 33 && input < 36) {
+    switch(input) {
+      case 33:
+        // bot win
+        lightBotRing(green, false);
+        break;
+      case 34:
+        // bot tie
+        lightBotRing(orange, false);
+        break;
+      case 35:
+        // bot lose
+        lightBotRing(red, false);
         break;
     }
   }
