@@ -131,20 +131,24 @@ void lightPlayerThird(int segment, int color, bool wipe) {
 }
 
 void lightPlayerRing(int color, bool wipe) {
-  if (wipe) neoWipe();
+  if (wipe) {
+    neoWipe();
+  }
 
   for (int i = 0; i < halfNeoLength; i++) {
-    strip.setPixelColor(i, color);
+    strip.setPixelColor(i + userPixelOffset, color);
   }
 
   strip.show();
 }
 
 void lightBotRing(int color, bool wipe) {
-  if (wipe) neoWipe();
+  if (wipe) {
+    neoWipe();
+  }
 
   for (int i = 0; i < halfNeoLength; i++) {
-    strip.setPixelColor(halfNeoLength + i, color);
+    strip.setPixelColor(i + botPixelOffset, color);
   }
 
   strip.show();
@@ -325,10 +329,11 @@ void displayScore(int playerScore, int botScore) {
   alpha4.writeDisplay();
 }
 
-void displayChars(char[4] chars) {
-  for (int i = 0; i < 4; i++) {
-    alpha4.writeDigitAscii(i, chars[i]); // convert to char
-  }
+void displayChars(char c0, char c1, char c2, char c3) {
+  alpha4.writeDigitAscii(0, c0);
+  alpha4.writeDigitAscii(1, c1);
+  alpha4.writeDigitAscii(2, c2);
+  alpha4.writeDigitAscii(3, c3);
 
   alpha4.writeDisplay();
 }
@@ -423,50 +428,57 @@ void displayFillRing() {
 void botHandIntro() {
   neoWipe();
 
-  delay(500); // dramatic pause
+  int timingDelay = 500;
+  delay(timingDelay * 3); // dramatic pause
 
   countdownOne(false);
-  delay(250);
+  delay(timingDelay);
   countdownTwo(false);
-  delay(250);
+  delay(timingDelay);
   countdownThree(false);
-  delay(250);
+  delay(timingDelay);
   countdownThrow(false);
-  delay(250);
 
   playRock();
-  delay(250);
-  playPaper();
-  delay(250);
+  delay(timingDelay);
   playScissors();
-  delay(250);
+  delay(timingDelay);
+  playPaper();
+  delay(timingDelay);
 
   playNeutral();
 
-  displayChars({'P', 'L', 'A', 'Y'});
-  delay(500);
+  displayChars('P', 'L', 'A', 'Y');
+  delay(timingDelay * 3);
 
   wipeDisplay();
 
   int numFlashes = 2;
   int white = strip.Color(255, 255, 255);
-  int flashDelay = 250;
 
   // flash user
   for (int i = 0; i < numFlashes; i++) {
-    displayChars({'0', ' ', ' ', ' '});
+    displayChars('0', ' ', ' ', ' ');
     lightPlayerRing(white, true);
-    delay(flashDelay);
+    delay(timingDelay);
+
+    neoWipe();
+    delay(timingDelay);
   }
 
   // flash bot
   for (int i = 0; i < numFlashes; i++) {
-    displayChars({'0', ' ', ' ', ' '});
+    displayChars(' ', ' ', ' ', '0');
     lightBotRing(white, true);
-    delay(flashDelay);
+    delay(timingDelay);
+
+    neoWipe();
+    delay(timingDelay);
   }
 
+  neoWipe();
   displayScore(0, 0);
+  delay(timingDelay);
 }
 
 void playerWinsOverall() {
@@ -476,27 +488,6 @@ void playerWinsOverall() {
 void botWinsOverall() {
   neoWipe();
 }
-
-void lightPlayerRing(int color, bool wipe) {
-  if (wipe) {
-    neoWipe();
-  }
-
-  for (int i = 0; i < halfNeoLength; i++) {
-    strip.setPixelColor(i + userPixelOffset, color);
-  }
-}
-
-void lightBotRing(int color, bool wipe) {
-  if (wipe) {
-    neoWipe();
-  }
-
-  for (int i = 0; i < halfNeoLength; i++) {
-    strip.setPixelColor(i + botPixelOffset, color);
-  }
-}
-
 
 void setup() {
   // exit(0);
@@ -586,9 +577,9 @@ void loop() {
   } else if (input == 21) {
     botWinsOverall();
   } else if (input == 22) {
-    lightPlayerRing(strip.Color(0, 255, 0));
+    lightPlayerRing(strip.Color(0, 255, 0), true);
   } else if (input == 23) {
-    lightBotRing(strip.Color(0, 255, 0));
+    lightBotRing(strip.Color(0, 255, 0), true);
   }
 //  delay(1000);
 }
