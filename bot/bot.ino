@@ -518,8 +518,7 @@ void botHandIntro() {
 
   playNeutral();
 
-  displayChars('P', 'L', 'A', 'Y');
-  delay(timingDelay * 3);
+  delay(timingDelay * 2);
 
   wipeDisplay();
 
@@ -545,9 +544,14 @@ void botHandIntro() {
     delay(timingDelay);
   }
 
+  displayChars('P', 'L', 'A', 'Y');
+  delay(timingDelay);
+  wipeDisplay();
+
   neoWipe();
   displayScore(0, 0);
   delay(timingDelay);
+
   Serial.write("introDone");
 }
 
@@ -586,6 +590,11 @@ void playerVictor(bool playerWon, uint32_t c, uint8_t wait) {
   neoWipe();
 }
 
+void hideDisplay() {
+  alpha4.clear();
+  alpha4.writeDisplay();
+}
+
 
 void setup() {
   // exit(0);
@@ -594,8 +603,6 @@ void setup() {
   alpha4.begin(0x70);  // pass in the address
   alpha4.clear();
   alpha4.writeDisplay();
-
-  displayScore(playerScore, botScore);
 
   strip.begin();
   strip.show(); // Initialize all pixels to 'off'
@@ -693,6 +700,8 @@ void loop() {
     playerScore = 0;
     botScore = 0;
 
+    hideDisplay();
+
     delay(250);
     Serial.write("victoryDone");
   } else if (input >= 24 && input < 27) {
@@ -758,6 +767,10 @@ void loop() {
 
     delay(250);
     Serial.write("botResultDone");
+  } else if (input == 36) {
+    clearDisplay();
+    delay(100);
+    Serial.write("displayCleared");
   }
 //  delay(1000);
 }

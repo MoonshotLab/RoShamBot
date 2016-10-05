@@ -51,7 +51,8 @@ SERIAL_MAP = {
     'playerWinRock': 24, 'playerTieRock': 25, 'playerLoseRock': 26,
     'playerWinPaper': 27, 'playerTiePaper': 28, 'playerLosePaper': 29,
     'playerWinScissors': 30, 'playerTieScissors': 31, 'playerLoseScissors': 32,
-    'botWin': 33, 'botTie': 34, 'botLose': 35
+    'botWin': 33, 'botTie': 34, 'botLose': 35,
+    'clearDisplay': 36
 }
 
 COUNTDOWN_MAP = {0: 'countOne', 1: 'countTwo', 2: 'countThree', 'throw': 'countThrow'}
