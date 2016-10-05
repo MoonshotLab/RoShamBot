@@ -22,7 +22,7 @@ def str_to_bool(val): return val == 'True'
 
 MEMORY = 5
 ROUNDS_TO_WIN = 3
-TIME_BETWEEN_MOVES = 2.5
+TIME_BETWEEN_MOVES = 2
 
 LOAD_FRESH = str_to_bool(os.environ.get("LOAD_FRESH"))
 CONNECT_TO_ARDUINO = str_to_bool(os.environ.get("CONNECT_TO_ARDUINO"))
@@ -628,7 +628,7 @@ def main():
 
             frame = controller.frame()
 
-            sleep_timing = 0.1
+            sleep_timing = 0.05
 
             if len(frame.hands) > 0:
                 if current_mode != 1:
@@ -653,18 +653,20 @@ def main():
             game[key] = 0
         game['turn'] = 1
         game['history'] = deque()
+        player_move = False
 
         bot_write('resetScores')
 
         # game loop
         while True:
-            # break
+            time.sleep(TIME_BETWEEN_MOVES)
+
             # neutral bot pose
             bot_write('n')
             bot_write('clearPlay')
 
             # traverse history, updating weights (only if last game was not tie)
-            if len(game['history']) > 0 and current_play != 'invalid':
+            if len(game['history']) > 0 and player_move != False:
                 len_history = len(game['history'])
                 nodes = list(game['history'])
 
@@ -698,7 +700,7 @@ def main():
             # countdown
             for i in range(3):
                 bot_write(COUNTDOWN_MAP[i])
-                time.sleep(0.9)
+                time.sleep(TIME_BETWEEN_MOVES / 3)
 
             # throw
             bot_write(COUNTDOWN_MAP['throw'])
@@ -716,8 +718,15 @@ def main():
             # no input
             if not len(move_history):
                 bot_write('readError')
-                time.sleep(TIME_BETWEEN_MOVES)
+                player_move = False
+                invalid_play_count += 1
+
+                if invalid_play_count >= 5:
+                    break
+
                 continue
+
+            invalid_play_count = 0 # reset
 
             # most frequent input
             player_move = dict_max(move_history)
@@ -773,8 +782,7 @@ def main():
                 game['history'].pop()
 
             game['turn'] += 1
-            time.sleep(TIME_BETWEEN_MOVES)
-        break
+        # break
 
 
 if __name__ == "__main__":

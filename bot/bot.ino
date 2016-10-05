@@ -50,12 +50,13 @@ Adafruit_AlphaNum4 alpha4 = Adafruit_AlphaNum4();
 // ring strips
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(fullNeoLength, NEOPIN, NEO_GRB + NEO_KHZ800); // GRB, not RGB!
 
-uint32_t red = strip.Color(255, 0, 0);
-uint32_t green = strip.Color(0, 255, 0);
+// wtf grb
+uint32_t red = strip.Color(0, 255, 0);
+uint32_t green = strip.Color(255, 0, 0);
 uint32_t blue = strip.Color(0, 0, 255);
-uint32_t orange = strip.Color(255, 165, 0);
+uint32_t orange = strip.Color(165, 255, 0);
 uint32_t white = strip.Color(255, 255, 255);
-uint32_t purple = strip.Color(128, 255, 128);
+uint32_t purple = strip.Color(0, 128, 128);
 
 void playNeutral() {
   upperFingers.write(upperRest);
@@ -697,7 +698,7 @@ void loop() {
         break;
       case 34:
         // bot tie
-        lightBotRing(orange, false);
+        lightBotRing(purple, false);
         break;
       case 35:
         // bot lose
