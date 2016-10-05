@@ -768,7 +768,7 @@ void loop() {
     delay(250);
     Serial.write("botResultDone");
   } else if (input == 36) {
-    clearDisplay();
+    hideDisplay();
     delay(100);
     Serial.write("displayCleared");
   }
