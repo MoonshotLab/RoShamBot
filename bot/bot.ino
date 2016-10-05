@@ -283,7 +283,7 @@ void countdownThree(bool user) {
 
 void countdownThrow(bool user) {
   int flashRepeat = 3;
-  uint32_t[flashRepeat] = {red, green, blue};
+  uint32_t flashColors[3] = {red, green, blue};
 
   for (int j = 0; j < flashRepeat; j++) {
     for (int i = 0; i < halfNeoLength; i++) {
