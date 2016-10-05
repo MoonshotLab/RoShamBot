@@ -622,7 +622,7 @@ def main():
 
                 frame = controller.frame()
 
-                sleep_timing = 0.05
+                sleep_timing = 0.1
 
                 if len(frame.hands) > 0:
                     if current_mode != 1:
@@ -639,7 +639,7 @@ def main():
 
             # bot hand test + countdown * 1
             bot_write('botHandTest')
-            time.sleep(5)
+            # time.sleep(5)
 
             # reset game vars
             game = {}
@@ -739,12 +739,14 @@ def main():
                     game['tie'] += 1
                     M['record']['tie'] += 1
 
+                    bot_write('clearPlay')
                     bot_write('playerTie' + FULL_PLAY[player_move].capitalize())
                     bot_write('botTie')
                 elif game_result == -1: # bot loses / player wins
                     game['loss'] += 1
                     M['record']['loss'] += 1
 
+                    bot_write('clearPlay')
                     bot_write('playerWin' + FULL_PLAY[player_move].capitalize())
                     bot_write('incPlayerScore')
                     bot_write('botLose')
@@ -752,6 +754,7 @@ def main():
                     game['win'] += 1
                     M['record']['win'] += 1
 
+                    bot_write('clearPlay')
                     bot_write('playerLose' + FULL_PLAY[player_move].capitalize())
                     bot_write('incBotScore')
                     bot_write('botWin')
@@ -786,7 +789,6 @@ def main():
         except:
             pass
 
-        # pickle graph
         cPickle.dump(M, open(PICKLE_FILE, 'wb'))
 
 

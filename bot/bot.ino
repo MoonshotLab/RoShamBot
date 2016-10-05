@@ -332,7 +332,7 @@ void lightNeoRing(int input) {
       break;
     case 7:
       // read error
-      readPlayerError(true);
+      readPlayerError(false);
       break;
     case 8:
       // count 1
@@ -657,6 +657,8 @@ void loop() {
   } else if (input == 19) {
     currentMode = 2;
     botHandIntro();
+    readyCount = 0;
+
   } else if (input == 20) {
     // playerWinsOverall(); // remove
   } else if (input == 21) {
@@ -669,45 +671,45 @@ void loop() {
     switch(input) {
       case 24:
         // player win rock
-        readPlayerRock(1, true);
+        readPlayerRock(1, false);
         break;
       case 25:
         // player tie rock
-        readPlayerRock(0, true);
+        readPlayerRock(0, false);
         break;
       case 26:
         // player lose rock
-        readPlayerRock(-1, true);
+        readPlayerRock(-1, false);
         break;
     }
   } else if (input >= 27 && input < 30) {
     switch(input) {
       case 27:
         // player win paper
-        readPlayerPaper(1, true);
+        readPlayerPaper(1, false);
         break;
       case 28:
         // player tie paper
-        readPlayerPaper(0, true);
+        readPlayerPaper(0, false);
         break;
       case 29:
         // player lose paper
-        readPlayerPaper(-1, true);
+        readPlayerPaper(-1, false);
         break;
     }
   } else if (input >= 30 && input < 33) {
     switch(input) {
       case 30:
         // player win scissors
-        readPlayerScissors(1, true);
+        readPlayerScissors(1, false);
         break;
       case 31:
         // player tie scissors
-        readPlayerScissors(0, true);
+        readPlayerScissors(0, false);
         break;
       case 32:
         // player lose scissors
-        readPlayerScissors(-1, true);
+        readPlayerScissors(-1, false);
         break;
     }
   } else if (input >= 33 && input < 36) {
