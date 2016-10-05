@@ -9,7 +9,10 @@
   #include <avr/power.h>
 #endif
 
-int currentMode;
+int rainbowInc = 0;
+
+int currentMode = 0;
+int *currentModePtr  = &currentMode;
 
 int playerScore = 0;
 int botScore = 0;
@@ -21,9 +24,11 @@ int upperFingersPin = 8;
 int lowerFingersPin = 7;
 
 #define NEOPIN 6
+int fullNeoLength = 50;
 int neoLength = 42;
 int halfNeoLength = neoLength / 2;
 int userPixelOffset = 2;
+int botPixelOffset = halfNeoLength + userPixelOffset + 2; // accounts for two display lights in the center
 
 int upperOpen = 85;
 int upperClosed = 0;
@@ -33,6 +38,8 @@ int lowerOpen = 0;
 int lowerClosed = 85;
 int lowerRest = (lowerOpen + lowerClosed) / 2;
 
+int throwDelay = 1000; // how many ms delay is shown
+
 // hand servos
 Servo upperFingers, lowerFingers;
 // Servo thumb;
@@ -41,7 +48,7 @@ Servo upperFingers, lowerFingers;
 Adafruit_AlphaNum4 alpha4 = Adafruit_AlphaNum4();
 
 // ring strips
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(neoLength, NEOPIN, NEO_GRB + NEO_KHZ800); // GRB, not RGB!
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(fullNeoLength, NEOPIN, NEO_GRB + NEO_KHZ800); // GRB, not RGB!
 
 void playNeutral() {
   upperFingers.write(upperRest);
@@ -87,7 +94,7 @@ void playMove(int input) {
 }
 
 void neoWipe() {
-  for (int i = 0; i < neoLength; i++) {
+  for (int i = 0; i < fullNeoLength; i++) {
     strip.setPixelColor(i, 0);
   }
 
@@ -155,7 +162,95 @@ void readPlayerScissors(bool wipe) {
 }
 
 void readPlayerError(bool wipe) {
-  lightPlayerRing(strip.Color(0, 255, 0), wipe); // red
+  lightPlayerRing(strip.Color(255, 0, 0), wipe); // red
+}
+
+void countdownOne() {
+  neoWipe();
+
+  for (int i  = 0; i < halfNeoLength / 3; i++) {
+    int posUser = i + userPixelOffset;
+    int posBot = i + botPixelOffset;
+
+    strip.setPixelColor(posUser, strip.Color(255, 255, 255));
+    strip.setPixelColor(posBot, strip.Color(255, 255, 255));
+    strip.show();
+    delay(10);
+  }
+}
+
+void countdownTwo() {
+  // fill in first segment
+  for (int i  = 0; i < halfNeoLength / 3; i++) {
+    int posUser = i + userPixelOffset;
+    int posBot = i + botPixelOffset;
+
+    strip.setPixelColor(posUser, strip.Color(255, 255, 255));
+    strip.setPixelColor(posBot, strip.Color(255, 255, 255));
+  }
+  strip.show();
+
+  // animate fill in second
+  for (int i  = 0; i < halfNeoLength / 3; i++) {
+    int posUser = (halfNeoLength / 3) + i + userPixelOffset;
+    int posBot = (halfNeoLength / 3) + i + botPixelOffset;
+
+    strip.setPixelColor(posUser, strip.Color(255, 255, 255));
+    strip.setPixelColor(posBot, strip.Color(255, 255, 255));
+    strip.show();
+    delay(10);
+  }
+}
+
+void countdownThree() {
+  // fill in first two segment
+  for (int i  = 0; i < 2 * halfNeoLength / 3; i++) {
+    int posUser = i + userPixelOffset;
+    int posBot = i + botPixelOffset;
+
+    strip.setPixelColor(posUser, strip.Color(255, 255, 255));
+    strip.setPixelColor(posBot, strip.Color(255, 255, 255));
+  }
+  strip.show();
+
+  // animate fill in third
+  for (int i  = 0; i < halfNeoLength / 3; i++) {
+    int posUser = (2 * halfNeoLength / 3) + i + userPixelOffset;
+    int posBot = (2 * halfNeoLength / 3) + i + botPixelOffset;
+
+    strip.setPixelColor(posUser, strip.Color(255, 255, 255));
+    strip.setPixelColor(posBot, strip.Color(255, 255, 255));
+    strip.show();
+    delay(10);
+  }
+}
+
+void countdownThrow() {
+  int flashRepeat = 3;
+  int flashColors[] = {strip.Color(255, 0, 0), strip.Color(0, 255, 0), strip.Color(0, 0, 255)};
+
+  for (int j = 0; j < flashRepeat; j++) {
+    for (int i = 0; i < halfNeoLength; i++) {
+      int posUser = i + userPixelOffset;
+      int posBot = i + botPixelOffset;
+
+      strip.setPixelColor(posUser, flashColors[j]);
+      strip.setPixelColor(posBot, flashColors[j]);
+    }
+    strip.show();
+    delay(100);
+  }
+
+  for (int i = 0; i < halfNeoLength; i++) {
+    int posUser = i + userPixelOffset;
+    int posBot = i + botPixelOffset;
+
+    strip.setPixelColor(posUser, strip.Color(255, 255, 255));
+    strip.setPixelColor(posBot, strip.Color(255, 255, 255));
+  }
+  strip.show();
+  delay(throwDelay);
+  neoWipe();
 }
 
 
@@ -179,19 +274,19 @@ void lightNeoRing(int input) {
       break;
     case 8:
       // count 1
-      // countdownOne();
+      countdownOne();
       break;
     case 9:
       // count 2
-      // countdownTwo();
+      countdownTwo();
       break;
     case 10:
       // count 3
-      // countdownThree();
+      countdownThree();
       break;
     case 11:
       // count throw
-      // countdownThrow();
+      countdownThrow();
       break;
   }
 }
@@ -255,20 +350,16 @@ void neoCountdown() {
   delay(1000);
 }
 
-void rainbowCycle(uint8_t wait) {
-  uint16_t i, j;
+void rainbowCycleInc(int val, int wait) {
+  val = val % 255;
 
-  while (true) {
-    for(j=0; j<256; j++) { // 5 cycles of all colors on wheel
-      for(i = 0; i < halfNeoLength; i++) {
-        strip.setPixelColor(i + userPixelOffset, Wheel(((i * 256 / strip.numPixels()) + j) & 255));
-      }
-      strip.show();
-      delay(wait);
-    }
+  for(int i = 0; i < halfNeoLength; i++) {
+    strip.setPixelColor(i + userPixelOffset, Wheel(((i * 256 / strip.numPixels()) + val) & 255));
   }
-}
 
+  strip.show();
+  delay(wait);
+}
 
 // Input a value 0 to 255 to get a color value.
 // The colours are a transition r - g - b - back to r.
@@ -332,7 +423,16 @@ void setup() {
 }
 
 void loop() {
-  while(Serial.available()==0){};
+  while(Serial.available()==0){
+    if (currentMode == 0) {
+      rainbowCycleInc(rainbowInc++, 20);
+
+      if (rainbowInc > 255) {
+        rainbowInc = 0;
+      }
+
+    }
+  }
 
   int input = Serial.read();
 
@@ -360,11 +460,10 @@ void loop() {
     displayScore(playerScore, botScore);
   } else if (input == 15) {
     // clear display
-    neoWipe();
     currentMode = -1;
+    neoWipe();
   } else if (input == 16) {
-    currentMode = 0;
-    rainbowCycle(20);
+    currentMode = 0; // rainbow cycle
   } else if (input >= 17 && input < 19) {
     currentMode = 1;
     switch(input) {
@@ -377,14 +476,14 @@ void loop() {
         readyCount--;
 
         if (readyCount == 0) {
-          currentMode = 1;
-          rainbowCycle(20);
+          currentMode = 0; // rainbow cycle
         }
         break;
     }
 
     displayFillRing();
   } else if (input == 19) {
+    currentMode = 2;
     botHandTest();
   } else if (input == 20) {
     playerWinsOverall();
