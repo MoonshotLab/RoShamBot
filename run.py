@@ -654,6 +654,7 @@ def main():
         game['turn'] = 1
         game['history'] = deque()
         player_move = False
+        invalid_play_count = 0
 
         bot_write('resetScores')
 
