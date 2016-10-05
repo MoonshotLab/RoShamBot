@@ -99,6 +99,7 @@ void playMove(int input) {
      default:
        exit(0);
   }
+  delay(100);
   Serial.write("moveDone");
 }
 
@@ -646,6 +647,7 @@ void loop() {
     // clear display
     currentMode = -1;
     neoWipe();
+    delay(250);
     Serial.write("wipeDone");
   } else if (input == 16) {
     currentMode = 0; // rainbow cycle

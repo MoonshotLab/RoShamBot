@@ -273,7 +273,7 @@ def main():
             bot_write('botHandTest')
 
             # wait to continue
-            print('prewait')
+            print('waiting for introDone')
             local_timeout_count = 0
             while True:
                 print(local_timeout_count)
@@ -311,7 +311,7 @@ def main():
                 bot_write('clearPlay')
 
                 # wait for start from arduino
-                print('prewait')
+                print('waiting for wipeDone')
                 local_timeout_count = 0
                 while True:
                     print(local_timeout_count)
@@ -367,7 +367,7 @@ def main():
                     time.sleep(TIME_BETWEEN_MOVES / 3.0)
 
                     # wait for start from arduino
-                    print('prewait')
+                    print('waiting for any data')
                     local_timeout_count = 0
                     while True:
                         print(local_timeout_count)
@@ -389,7 +389,7 @@ def main():
                 bot_write(COUNTDOWN_MAP['throw'])
 
                 # wait for start from arduino
-                print('prewait')
+                print('waiting for throwDone')
                 local_timeout_count = 0
                 while True:
                     print(local_timeout_count)
@@ -424,7 +424,7 @@ def main():
                     invalid_play_count += 1
 
                     # wait for start from arduino
-                    print('prewait')
+                    print('waiting for errorDone')
                     local_timeout_count = 0
                     while True:
                         print(local_timeout_count)
@@ -456,7 +456,7 @@ def main():
                 bot_write(bot_move)
 
                 # wait for start from arduino
-                print('prewait')
+                print('waiting for moveDone')
                 local_timeout_count = 0
                 while True:
                     print(local_timeout_count)
@@ -505,7 +505,7 @@ def main():
                     bot_write('botWin')
 
                 # wait for start from arduino
-                print('prewait')
+                print('waiting for botResultDone')
                 local_timeout_count = 0
                 while True:
                     print(local_timeout_count)
@@ -546,7 +546,7 @@ def main():
                 game['turn'] += 1
 
                 # wait for start from arduino
-                print('prewait')
+                print('waiting for victoryDone')
                 local_timeout_count = 0
                 while True:
                     print(local_timeout_count)
