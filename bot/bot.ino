@@ -55,6 +55,7 @@ uint32_t green = strip.Color(0, 255, 0);
 uint32_t blue = strip.Color(0, 0, 255);
 uint32_t orange = strip.Color(255, 165, 0);
 uint32_t white = strip.Color(255, 255, 255);
+uint32_t purple = strip.Color(128, 255, 128);
 
 void playNeutral() {
   upperFingers.write(upperRest);
@@ -166,8 +167,8 @@ void readPlayerRock(int res, bool wipe) {
     // lose, red
     color = red;
   } else if (res == 0) {
-    // tie, orange
-    color = orange;
+    // tie, purple
+    color = purple;
   } else if (res == 1) {
     // win, green
     color = green;
@@ -182,8 +183,8 @@ void readPlayerPaper(int res, bool wipe) {
     // lose, red
     color = red;
   } else if (res == 0) {
-    // tie, orange
-    color = orange;
+    // tie, purple
+    color = purple;
   } else if (res == 1) {
     // win, green
     color = green;
@@ -197,8 +198,8 @@ void readPlayerScissors(int res, bool wipe) {
     // lose, red
     color = red;
   } else if (res == 0) {
-    // tie, orange
-    color = orange;
+    // tie, purple
+    color = purple;
   } else if (res == 1) {
     // win, green
     color = green;
@@ -208,7 +209,7 @@ void readPlayerScissors(int res, bool wipe) {
 }
 
 void readPlayerError(bool wipe) {
-  lightPlayerRing(red, wipe); // red
+  lightPlayerRing(red, wipe);
 }
 
 void countdownOne(bool user) {
@@ -380,35 +381,35 @@ void displayChars(char c0, char c1, char c2, char c3) {
   alpha4.writeDisplay();
 }
 
-void playerOneWin() {
-  neoWipe();
-
-  for (int i = 0; i < halfNeoLength; i++) {
-    uint32_t green = strip.Color(255, 0, 0);
-    uint32_t red = green;
-
-    strip.setPixelColor(i, red);
-    strip.setPixelColor(i + 24, green);
-  }
-
-  strip.show();
-  delay(2000);
-}
-
-void playerTwoWin() {
-  neoWipe();
-
-  for (int i = 0; i < halfNeoLength; i++) {
-    uint32_t green = strip.Color(255, 0, 0);
-    uint32_t red = green;
-
-    strip.setPixelColor(i, green);
-    strip.setPixelColor(i + halfNeoLength, red);
-  }
-
-  strip.show();
-  delay(2000);
-}
+// void playerOneWin() {
+//   neoWipe();
+//
+//   for (int i = 0; i < halfNeoLength; i++) {
+//     uint32_t green = strip.Color(255, 0, 0);
+//     uint32_t red = green;
+//
+//     strip.setPixelColor(i, red);
+//     strip.setPixelColor(i + 24, green);
+//   }
+//
+//   strip.show();
+//   delay(2000);
+// }
+//
+// void playerTwoWin() {
+//   neoWipe();
+//
+//   for (int i = 0; i < halfNeoLength; i++) {
+//     uint32_t green = strip.Color(255, 0, 0);
+//     uint32_t red = green;
+//
+//     strip.setPixelColor(i, green);
+//     strip.setPixelColor(i + halfNeoLength, red);
+//   }
+//
+//   strip.show();
+//   delay(2000);
+// }
 
 void neoCountdown() {
   neoWipe();
@@ -467,6 +468,21 @@ void displayFillRing() {
 }
 
 void botHandIntro() {
+  neoWipe();
+
+  int flashRepeat = 3;
+  uint32_t flashColors[3] = {red, green, blue};
+  for (int j = 0; j < flashRepeat; j++) {
+    for (int i = 0; i < halfNeoLength; i++) {
+      int posUser = i + userPixelOffset;
+      strip.setPixelColor(posUser, flashColors[j]);
+      int posBot = i + botPixelOffset;
+      strip.setPixelColor(posBot, flashColors[j]);
+    }
+    strip.show();
+    delay(100);
+  }
+
   neoWipe();
 
   int timingDelay = 500;

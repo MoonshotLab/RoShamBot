@@ -53,7 +53,7 @@ SERIAL_MAP = {
     'botWin': 33, 'botTie': 34, 'botLose': 35
 }
 
-COUNTDOWN_MAP = {1: 'countOne', 2: 'countTwo', 3: 'countThree', 'throw': 'countThrow'}
+COUNTDOWN_MAP = {0: 'countOne', 1: 'countTwo', 2: 'countThree', 'throw': 'countThrow'}
 
 class SampleListener(Leap.Listener):
     def getMove(self, controller):
@@ -658,7 +658,7 @@ def main():
 
         # game loop
         while True:
-            break
+            # break
             # neutral bot pose
             bot_write('n')
             bot_write('clearPlay')
@@ -696,7 +696,7 @@ def main():
             bot_move = BEATS[guess] # what'll beat it
 
             # countdown
-            for i in range(3, 0, -1):
+            for i in range(3):
                 bot_write(COUNTDOWN_MAP[i])
                 time.sleep(0.9)
 
@@ -770,7 +770,7 @@ def main():
             game['history'].appendLeft(player_move)
 
             while len(game['history']) > MEMORY:
-                history.pop()
+                game['history'].pop()
 
             game['turn'] += 1
             time.sleep(TIME_BETWEEN_MOVES)
