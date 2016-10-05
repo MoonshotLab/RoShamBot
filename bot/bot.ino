@@ -616,14 +616,14 @@ void setup() {
 
 void loop() {
   while(Serial.available()==0){
-    if (currentMode == 0) {
-      rainbowCycleInc(rainbowInc++, 20);
-
-      if (rainbowInc > 255) {
-        rainbowInc = 0;
-      }
-
-    }
+    // if (currentMode == 0) {
+    //   rainbowCycleInc(rainbowInc++, 20);
+    //
+    //   if (rainbowInc > 255) {
+    //     rainbowInc = 0;
+    //   }
+    //
+    // }
   }
 
   int input = Serial.read();
