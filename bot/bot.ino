@@ -99,6 +99,7 @@ void playMove(int input) {
      default:
        exit(0);
   }
+  Serial.write("moveDone");
 }
 
 void neoWipe() {
@@ -227,6 +228,8 @@ void countdownOne(bool user) {
     strip.show();
     delay(10);
   }
+
+  Serial.write("oneDone");
 }
 
 void countdownTwo(bool user) {
@@ -254,6 +257,8 @@ void countdownTwo(bool user) {
     strip.show();
     delay(10);
   }
+
+  Serial.write("twoDone");
 }
 
 void countdownThree(bool user) {
@@ -281,6 +286,8 @@ void countdownThree(bool user) {
     strip.show();
     delay(10);
   }
+
+  Serial.write("threeDone");
 }
 
 void countdownThrow(bool user) {
@@ -313,6 +320,8 @@ void countdownThrow(bool user) {
   strip.show();
   delay(throwDelay);
   neoWipe();
+
+  Serial.write("throwDone");
 }
 
 
@@ -536,6 +545,7 @@ void botHandIntro() {
   neoWipe();
   displayScore(0, 0);
   delay(timingDelay);
+  Serial.write("introDone");
 }
 
 void playerVictor(bool playerWon, uint32_t c, uint8_t wait) {
@@ -634,6 +644,7 @@ void loop() {
     // clear display
     currentMode = -1;
     neoWipe();
+    Serial.write("wipeDone");
   } else if (input == 16) {
     currentMode = 0; // rainbow cycle
   } else if (input >= 17 && input < 19) {
@@ -665,8 +676,12 @@ void loop() {
     // botWinsOverall(); // remove
   } else if (input == 22) {
     playerVictor(true, green, 20);
+    delay(250);
+    Serial.write("playerVictorDone");
   } else if (input == 23) {
     playerVictor(false, green, 20);
+    delay(250);
+    Serial.write("botVictorDone");
   } else if (input >= 24 && input < 27) {
     switch(input) {
       case 24:
@@ -727,6 +742,9 @@ void loop() {
         lightBotRing(red, false);
         break;
     }
+
+    delay(250);
+    Serial.write("botResultDone");
   }
 //  delay(1000);
 }
