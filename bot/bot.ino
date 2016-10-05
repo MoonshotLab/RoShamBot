@@ -12,7 +12,6 @@
 int rainbowInc = 0;
 
 int currentMode = 0;
-int *currentModePtr  = &currentMode;
 
 int playerScore = 0;
 int botScore = 0;
@@ -42,7 +41,6 @@ int throwDelay = 2000; // how many ms throw is shown
 
 // hand servos
 Servo upperFingers, lowerFingers;
-// Servo thumb;
 
 // score display
 Adafruit_AlphaNum4 alpha4 = Adafruit_AlphaNum4();
@@ -394,36 +392,6 @@ void displayChars(char c0, char c1, char c2, char c3) {
   alpha4.writeDisplay();
 }
 
-// void playerOneWin() {
-//   neoWipe();
-//
-//   for (int i = 0; i < halfNeoLength; i++) {
-//     uint32_t green = strip.Color(255, 0, 0);
-//     uint32_t red = green;
-//
-//     strip.setPixelColor(i, red);
-//     strip.setPixelColor(i + 24, green);
-//   }
-//
-//   strip.show();
-//   delay(2000);
-// }
-//
-// void playerTwoWin() {
-//   neoWipe();
-//
-//   for (int i = 0; i < halfNeoLength; i++) {
-//     uint32_t green = strip.Color(255, 0, 0);
-//     uint32_t red = green;
-//
-//     strip.setPixelColor(i, green);
-//     strip.setPixelColor(i + halfNeoLength, red);
-//   }
-//
-//   strip.show();
-//   delay(2000);
-// }
-
 void neoCountdown() {
   neoWipe();
 
@@ -616,14 +584,15 @@ void setup() {
 
 void loop() {
   while(Serial.available()==0){
-    // if (currentMode == 0) {
-    //   rainbowCycleInc(rainbowInc++, 20);
-    //
-    //   if (rainbowInc > 255) {
-    //     rainbowInc = 0;
-    //   }
-    //
-    // }
+    if (currentMode == 0) {
+      rainbowCycleInc(rainbowInc++, 20);
+
+      if (rainbowInc > 255) {
+        rainbowInc = 0;
+      }
+    }
+
+    delay(10);
   }
 
   int input = Serial.read();
@@ -772,5 +741,4 @@ void loop() {
     delay(100);
     Serial.write("displayCleared");
   }
-//  delay(1000);
 }

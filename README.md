@@ -19,13 +19,10 @@ LEAP_SDK_LOCATION="/Users/moonshot/Documents/src/LeapSDK/lib"
 
 LOAD_FRESH=True
 CONNECT_TO_ARDUINO=True
-PLAY_TUTORIAL=True
 LEAP_CONTROL=True
 DEBUG=True
-REPLAY=True
 ```
 
 ### Do tha thang
-```
-python roshambot.py
-```
+* Upload `bot/bot.ino` to your Arduino.
+* Run `python run.py`

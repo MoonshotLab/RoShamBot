@@ -29,7 +29,6 @@ LOAD_FRESH = str_to_bool(os.environ.get("LOAD_FRESH"))
 CONNECT_TO_ARDUINO = str_to_bool(os.environ.get("CONNECT_TO_ARDUINO"))
 PLAY_TUTORIAL = str_to_bool(os.environ.get("PLAY_TUTORIAL"))
 DEBUG = str_to_bool(os.environ.get("DEBUG"))
-REPLAY = str_to_bool(os.environ.get("REPLAY"))
 
 PICKLE_FILE = 'model.pk'
 
