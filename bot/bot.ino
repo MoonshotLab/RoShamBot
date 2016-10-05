@@ -38,7 +38,7 @@ int lowerOpen = 0;
 int lowerClosed = 85;
 int lowerRest = (lowerOpen + lowerClosed) / 2;
 
-int throwDelay = 1000; // how many ms delay is shown
+int throwDelay = 2000; // how many ms throw is shown
 
 // hand servos
 Servo upperFingers, lowerFingers;
@@ -49,6 +49,12 @@ Adafruit_AlphaNum4 alpha4 = Adafruit_AlphaNum4();
 
 // ring strips
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(fullNeoLength, NEOPIN, NEO_GRB + NEO_KHZ800); // GRB, not RGB!
+
+uint32_t red = strip.Color(255, 0, 0);
+uint32_t green = strip.Color(0, 255, 0);
+uint32_t blue = strip.Color(0, 0, 255);
+uint32_t orange = strip.Color(255, 165, 0);
+uint32_t white = strip.Color(255, 255, 255);
 
 void playNeutral() {
   upperFingers.write(upperRest);
@@ -117,7 +123,7 @@ void botWipe() {
   strip.show();
 }
 
-void lightPlayerThird(int segment, int color, bool wipe) {
+void lightPlayerThird(int segment, uint32_t color, bool wipe) {
   if (wipe) neoWipe();
 
   segment = segment % 3;
@@ -130,7 +136,7 @@ void lightPlayerThird(int segment, int color, bool wipe) {
   strip.show();
 }
 
-void lightPlayerRing(int color, bool wipe) {
+void lightPlayerRing(uint32_t color, bool wipe) {
   if (wipe) {
     neoWipe();
   }
@@ -142,7 +148,7 @@ void lightPlayerRing(int color, bool wipe) {
   strip.show();
 }
 
-void lightBotRing(int color, bool wipe) {
+void lightBotRing(uint32_t color, bool wipe) {
   if (wipe) {
     neoWipe();
   }
@@ -154,19 +160,55 @@ void lightBotRing(int color, bool wipe) {
   strip.show();
 }
 
-void readPlayerRock(bool wipe) {
-  lightPlayerThird(0, strip.Color(0, 0, 255), wipe); // blue
+void readPlayerRock(int res, bool wipe) {
+  uint32_t color;
+  if (res == -1) {
+    // lose, red
+    color = red;
+  } else if (res == 0) {
+    // tie, orange
+    color = orange;
+  } else if (res == 1) {
+    // win, green
+    color = green;
+  }
+
+  lightPlayerThird(0, color, wipe);
 }
 
-void readPlayerPaper(bool wipe) {
-  lightPlayerThird(1, strip.Color(0, 0, 255), wipe); // blue
+void readPlayerPaper(int res, bool wipe) {
+  uint32_t color;
+  if (res == -1) {
+    // lose, red
+    color = red;
+  } else if (res == 0) {
+    // tie, orange
+    color = orange;
+  } else if (res == 1) {
+    // win, green
+    color = green;
+  }
+
+  lightPlayerThird(1, color, wipe);
 }
-void readPlayerScissors(bool wipe) {
-  lightPlayerThird(2, strip.Color(0, 0, 255), wipe); // blue
+void readPlayerScissors(int res, bool wipe) {
+  uint32_t color;
+  if (res == -1) {
+    // lose, red
+    color = red;
+  } else if (res == 0) {
+    // tie, orange
+    color = orange;
+  } else if (res == 1) {
+    // win, green
+    color = green;
+  }
+
+  lightPlayerThird(2, color, wipe);
 }
 
 void readPlayerError(bool wipe) {
-  lightPlayerRing(strip.Color(255, 0, 0), wipe); // red
+  lightPlayerRing(red, wipe); // red
 }
 
 void countdownOne(bool user) {
@@ -175,11 +217,11 @@ void countdownOne(bool user) {
   for (int i  = 0; i < halfNeoLength / 3; i++) {
     if (user) {
       int posUser = i + userPixelOffset;
-      strip.setPixelColor(posUser, strip.Color(255, 255, 255));
+      strip.setPixelColor(posUser, white);
     }
 
     int posBot = i + botPixelOffset;
-    strip.setPixelColor(posBot, strip.Color(255, 255, 255));
+    strip.setPixelColor(posBot, white);
     strip.show();
     delay(10);
   }
@@ -190,11 +232,11 @@ void countdownTwo(bool user) {
   for (int i  = 0; i < halfNeoLength / 3; i++) {
     if (user) {
       int posUser = i + userPixelOffset;
-      strip.setPixelColor(posUser, strip.Color(255, 255, 255));
+      strip.setPixelColor(posUser, white);
     }
 
     int posBot = i + botPixelOffset;
-    strip.setPixelColor(posBot, strip.Color(255, 255, 255));
+    strip.setPixelColor(posBot, white);
   }
   strip.show();
 
@@ -202,11 +244,11 @@ void countdownTwo(bool user) {
   for (int i  = 0; i < halfNeoLength / 3; i++) {
     if (user) {
       int posUser = (halfNeoLength / 3) + i + userPixelOffset;
-      strip.setPixelColor(posUser, strip.Color(255, 255, 255));
+      strip.setPixelColor(posUser, white);
     }
 
     int posBot = (halfNeoLength / 3) + i + botPixelOffset;
-    strip.setPixelColor(posBot, strip.Color(255, 255, 255));
+    strip.setPixelColor(posBot, white);
     strip.show();
     delay(10);
   }
@@ -217,11 +259,11 @@ void countdownThree(bool user) {
   for (int i  = 0; i < 2 * halfNeoLength / 3; i++) {
     if (user) {
       int posUser = i + userPixelOffset;
-      strip.setPixelColor(posUser, strip.Color(255, 255, 255));
+      strip.setPixelColor(posUser, white);
     }
 
     int posBot = i + botPixelOffset;
-    strip.setPixelColor(posBot, strip.Color(255, 255, 255));
+    strip.setPixelColor(posBot, white);
   }
   strip.show();
 
@@ -229,11 +271,11 @@ void countdownThree(bool user) {
   for (int i  = 0; i < halfNeoLength / 3; i++) {
     if (user) {
       int posUser = (2 * halfNeoLength / 3) + i + userPixelOffset;
-      strip.setPixelColor(posUser, strip.Color(255, 255, 255));
+      strip.setPixelColor(posUser, white);
     }
 
     int posBot = (2 * halfNeoLength / 3) + i + botPixelOffset;
-    strip.setPixelColor(posBot, strip.Color(255, 255, 255));
+    strip.setPixelColor(posBot, white);
     strip.show();
     delay(10);
   }
@@ -241,7 +283,7 @@ void countdownThree(bool user) {
 
 void countdownThrow(bool user) {
   int flashRepeat = 3;
-  int flashColors[] = {strip.Color(255, 0, 0), strip.Color(0, 255, 0), strip.Color(0, 0, 255)};
+  uint32_t[flashRepeat] = {red, green, blue};
 
   for (int j = 0; j < flashRepeat; j++) {
     for (int i = 0; i < halfNeoLength; i++) {
@@ -260,11 +302,11 @@ void countdownThrow(bool user) {
   for (int i = 0; i < halfNeoLength; i++) {
     if (user) {
       int posUser = i + userPixelOffset;
-      strip.setPixelColor(posUser, strip.Color(255, 255, 255));
+      strip.setPixelColor(posUser, white);
     }
 
     int posBot = i + botPixelOffset;
-    strip.setPixelColor(posBot, strip.Color(255, 255, 255));
+    strip.setPixelColor(posBot, white);
   }
   strip.show();
   delay(throwDelay);
@@ -276,15 +318,15 @@ void lightNeoRing(int input) {
   switch(input) {
     case 4:
       // read scissors
-      readPlayerScissors(true);
+      // readPlayerScissors(true);
       break;
     case 5:
       // read paper
-      readPlayerPaper(true);
+      // readPlayerPaper(true);
       break;
     case 6:
       // read rock
-      readPlayerRock(true);
+      // readPlayerRock(true);
       break;
     case 7:
       // read error
@@ -343,7 +385,7 @@ void playerOneWin() {
 
   for (int i = 0; i < halfNeoLength; i++) {
     uint32_t green = strip.Color(255, 0, 0);
-    uint32_t red = strip.Color(0, 255, 0);
+    uint32_t red = green;
 
     strip.setPixelColor(i, red);
     strip.setPixelColor(i + 24, green);
@@ -358,7 +400,7 @@ void playerTwoWin() {
 
   for (int i = 0; i < halfNeoLength; i++) {
     uint32_t green = strip.Color(255, 0, 0);
-    uint32_t red = strip.Color(0, 255, 0);
+    uint32_t red = green;
 
     strip.setPixelColor(i, green);
     strip.setPixelColor(i + halfNeoLength, red);
@@ -372,7 +414,6 @@ void neoCountdown() {
   neoWipe();
 
   for (int i = 0; i < halfNeoLength; i++) {
-    uint32_t blue = strip.Color(0, 0, 255);
     strip.setPixelColor(i, blue);
     strip.setPixelColor(i + halfNeoLength, blue);
     if (i != 0 && i % (halfNeoLength / 3) == 0) {
@@ -419,7 +460,7 @@ void displayFillRing() {
 
   if (readyCount > 0) {
     for (int i = 0; i < fillPct; i++) {
-      strip.setPixelColor(i + userPixelOffset, strip.Color(255, 255, 255));
+      strip.setPixelColor(i + userPixelOffset, white);
     }
     strip.show();
   }
@@ -454,7 +495,6 @@ void botHandIntro() {
   wipeDisplay();
 
   int numFlashes = 2;
-  int white = strip.Color(255, 255, 255);
 
   // flash user
   for (int i = 0; i < numFlashes; i++) {
@@ -577,9 +617,54 @@ void loop() {
   } else if (input == 21) {
     botWinsOverall();
   } else if (input == 22) {
-    lightPlayerRing(strip.Color(0, 255, 0), true);
+    lightPlayerRing(green, true);
   } else if (input == 23) {
-    lightBotRing(strip.Color(0, 255, 0), true);
+    lightBotRing(green, true);
+  } else if (input >= 24 && input < 27) {
+    switch(input) {
+      case 24:
+        // player win rock
+        readPlayerRock(1, true);
+        break;
+      case 25:
+        // player tie rock
+        readPlayerRock(0, true);
+        break;
+      case 26:
+        // player lose rock
+        readPlayerRock(-1, true);
+        break;
+    }
+  } else if (input >= 27 && input < 30) {
+    switch(input) {
+      case 27:
+        // player win paper
+        readPlayerPaper(1, true);
+        break;
+      case 28:
+        // player tie paper
+        readPlayerPaper(0, true);
+        break;
+      case 29:
+        // player lose paper
+        readPlayerPaper(-1, true);
+        break;
+    }
+  } else if (input >= 30 && input < 33) {
+    switch(input) {
+      case 30:
+        // player win scissors
+        readPlayerScissors(1, true);
+        break;
+      case 31:
+        // player tie scissors
+        readPlayerScissors(0, true);
+        break;
+      case 32:
+        // player lose scissors
+        readPlayerScissors(-1, true);
+        break;
+    }
   }
 //  delay(1000);
 }

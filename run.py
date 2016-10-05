@@ -45,7 +45,11 @@ SERIAL_MAP = {
     'glowLoop': 16,
     'fillRingInc': 17, 'fillRingDec': 18,
     'botHandTest': 19,
-    'playerWins': 20, 'botWins': 21
+    'playerWins': 20, 'botWins': 21,
+    'playerVictory': 22, 'botVictory': 23,
+    'playerWinRock': 24, 'playerTieRock': 25, 'playerLoseRock': 26,
+    'playerWinPaper': 27, 'playerTiePaper': 28, 'playerLosePaper': 29,
+    'playerWinScissors': 30, 'playerTieScissors': 31, 'playerLoseScissors': 32,
 }
 
 COUNTDOWN_MAP = {1: 'countOne', 2: 'countTwo', 3: 'countThree', 'throw': 'countThrow'}
