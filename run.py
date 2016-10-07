@@ -112,7 +112,7 @@ def get_guess(history, model):
         for play in plays:
             guess_dict[play] += plays[play] * (query_level + 1)
 
-    guess = dict_max(guess_dict)
+    guess = weighted_random_dict_choice(guess_dict)
     return guess
 
 def str_to_bool(val):
@@ -175,6 +175,20 @@ def dict_max(dict):
         return CHOICES[0]
 
     return best
+
+def weighted_random_dict_choice(dict):
+    try:
+        # make sure dict has all possible choices
+        total_weight = 0.0 # float
+
+        for key in dict:
+            total_weight += dict[key]
+
+        # return a random weighted choice
+        return npchoice(dict.keys(), p=[dict[key]/total_weight for key in dict.keys()])
+    except:
+        # default to a random choice
+        return npchoice(CHOICES)
 
 def get_game_result(p1, p2):
     if p1 == p2:
