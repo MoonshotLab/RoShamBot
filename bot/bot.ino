@@ -27,7 +27,7 @@ int fullNeoLength = 50;
 int neoLength = 42;
 int halfNeoLength = neoLength / 2;
 int userPixelOffset = 2;
-int botPixelOffset = halfNeoLength + userPixelOffset + 2; // accounts for two display lights in the center
+int botPixelOffset = halfNeoLength + userPixelOffset + 4; // accounts for two display lights in the center
 
 int upperOpen = 85;
 int upperClosed = 0;
