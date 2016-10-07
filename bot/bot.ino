@@ -513,7 +513,7 @@ void botHandIntro() {
   }
 
   displayChars('P', 'L', 'A', 'Y');
-  delay(timingDelay);
+  delay(timingDelay / 2);
   wipeDisplay();
 
   neoWipe();
@@ -627,6 +627,8 @@ void loop() {
     Serial.write("wipeDone");
   } else if (input == 16) {
     currentMode = 0; // rainbow cycle
+    playerScore = 0;
+    botScore = 0;
   } else if (input >= 17 && input < 19) {
     currentMode = 1;
     switch(input) {
