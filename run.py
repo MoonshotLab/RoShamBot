@@ -195,20 +195,6 @@ def get_fresh_model():
         'nn': []
     }
 
-def wait_for_bot():
-    local_timeout_count = 0
-    while True:
-        if local_timeout_count > TIMEOUT_LENGTH:
-            return False
-
-        bytes_to_read = bot.inWaiting()
-        data = bot.read(bytes_to_read)
-
-        if (data):
-            return True
-
-        local_timeout_count += 1
-
 try:
     bot = serial.Serial(os.environ.get("SERIAL_PORT"), 9600, timeout=1)
 except:
@@ -275,9 +261,11 @@ def main():
             # wait to continue
             print('waiting for introDone')
             local_timeout_count = 0
+            timeout = False
             while True:
                 print(local_timeout_count)
                 if local_timeout_count >= TIMEOUT_LENGTH:
+                    timeout = True
                     break
 
                 bytes_to_read = bot.inWaiting()
@@ -290,6 +278,9 @@ def main():
                 local_timeout_count += 1
                 time.sleep(0.1)
             print('postwait')
+
+            if timeout:
+                break # restart
 
             # reset game vars
             game = {}
@@ -313,9 +304,11 @@ def main():
                 # wait for start from arduino
                 print('waiting for wipeDone')
                 local_timeout_count = 0
+                timeout = False
                 while True:
                     print(local_timeout_count)
                     if local_timeout_count >= TIMEOUT_LENGTH:
+                        timeout = True
                         break
 
                     bytes_to_read = bot.inWaiting()
@@ -328,6 +321,9 @@ def main():
                     local_timeout_count += 1
                     time.sleep(0.1)
                 print('postwait')
+
+                if timeout:
+                    break # restart
 
                 # traverse history, updating weights (only if last game was not tie)
                 if len(game['history']) > 0 and player_move != False:
@@ -369,9 +365,11 @@ def main():
                     # wait for start from arduino
                     print('waiting for any data')
                     local_timeout_count = 0
+                    timeout = False
                     while True:
                         print(local_timeout_count)
                         if local_timeout_count >= TIMEOUT_LENGTH:
+                            timeout = True
                             break
 
                         bytes_to_read = bot.inWaiting()
@@ -385,15 +383,20 @@ def main():
                         time.sleep(0.1)
                     print('postwait')
 
+                    if timeout:
+                        break # restart
+
                 # throw
                 bot_write(COUNTDOWN_MAP['throw'])
 
                 # wait for start from arduino
                 print('waiting for throwDone')
                 local_timeout_count = 0
+                timeout = False
                 while True:
                     print(local_timeout_count)
                     if local_timeout_count >= TIMEOUT_LENGTH:
+                        timeout = True
                         break
 
                     bytes_to_read = bot.inWaiting()
@@ -406,6 +409,9 @@ def main():
                     local_timeout_count += 1
                     time.sleep(0.1)
                 print('postwait')
+
+                if timeout:
+                    break # restart
 
                 # use a move dict to get an average to make sure we're reading the input correctly
                 move_history = {} # reset dict
@@ -426,9 +432,11 @@ def main():
                     # wait for start from arduino
                     print('waiting for errorDone')
                     local_timeout_count = 0
+                    timeout = False
                     while True:
                         print(local_timeout_count)
                         if local_timeout_count >= TIMEOUT_LENGTH:
+                            timeout = True
                             break
 
                         bytes_to_read = bot.inWaiting()
@@ -441,6 +449,9 @@ def main():
                         local_timeout_count += 1
                         time.sleep(0.1)
                     print('postwait')
+
+                    if timeout:
+                        break # restart
 
                     if invalid_play_count >= 5:
                         break
@@ -461,9 +472,11 @@ def main():
                 # wait for start from arduino
                 print('waiting for moveDone')
                 local_timeout_count = 0
+                timeout = False
                 while True:
                     print(local_timeout_count)
                     if local_timeout_count >= TIMEOUT_LENGTH:
+                        timeout = True
                         break
 
                     bytes_to_read = bot.inWaiting()
@@ -476,6 +489,9 @@ def main():
                     local_timeout_count += 1
                     time.sleep(0.1)
                 print('postwait')
+
+                if timeout:
+                    break # restart
 
                 # increment total number of games played by this model
                 M['record']['games'] += 1
@@ -510,9 +526,11 @@ def main():
                 # wait for start from arduino
                 print('waiting for botResultDone')
                 local_timeout_count = 0
+                timeout = False
                 while True:
                     print(local_timeout_count)
                     if local_timeout_count >= TIMEOUT_LENGTH:
+                        timeout = True
                         break
 
                     bytes_to_read = bot.inWaiting()
@@ -525,6 +543,9 @@ def main():
                     local_timeout_count += 1
                     time.sleep(0.1)
                 print('postwait')
+
+                if timeout:
+                    break # restart
 
                 if game['loss'] >= ROUNDS_TO_WIN or game['win'] >= ROUNDS_TO_WIN:
                     if DEBUG:
@@ -542,9 +563,11 @@ def main():
                     # wait for start from arduino
                     print('waiting for victoryDone')
                     local_timeout_count = 0
+                    timeout = False
                     while True:
                         print(local_timeout_count)
                         if local_timeout_count >= TIMEOUT_LENGTH:
+                            timeout = True
                             break
 
                         bytes_to_read = bot.inWaiting()
@@ -557,6 +580,7 @@ def main():
                         local_timeout_count += 1
                         time.sleep(0.1)
                     print('postwait')
+
                     break
 
                 game['history'].appendleft(player_move)
