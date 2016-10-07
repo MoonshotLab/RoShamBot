@@ -293,8 +293,8 @@ def main():
                 data = bot.read(bytes_to_read)
 
                 if (data == "introDone"):
-                    print('data' + str(data))
-                    logging.info('data' + str(data))
+                    print('data: ' + str(data))
+                    logging.info('data: ' + str(data))
                     break
 
                 local_timeout_count += 1
@@ -341,8 +341,8 @@ def main():
                     data = bot.read(bytes_to_read)
 
                     if (data == "wipeDone"):
-                        print('data' + str(data))
-                        logging.info('data' + str(data))
+                        print('data: ' + str(data))
+                        logging.info('data: ' + str(data))
                         break
 
                     local_timeout_count += 1
@@ -373,13 +373,13 @@ def main():
                         if concatted_row in M['nn'][depth]:
                             if DEBUG:
                                 print('incrementing: ', concatted_row, ' to a val of ', M['nn'][depth][concatted_row])
-                                logging.info('incrementing: ', concatted_row, ' to a val of ', M['nn'][depth][concatted_row])
+                                # logging.info('incrementing: ', concatted_row, ' to a val of ', M['nn'][depth][concatted_row])
 
                             M['nn'][depth][concatted_row] += 1
                         else:
                             if DEBUG:
                                 print('adding: ', concatted_row)
-                                logging.info('adding: ', concatted_row)
+                                # logging.info('adding: ', concatted_row)
 
                             M['nn'][depth][concatted_row] = 1
 
@@ -409,8 +409,8 @@ def main():
                         data = bot.read(bytes_to_read)
 
                         if (data):
-                            print('data' + str(data))
-                            logging.info('data' + str(data))
+                            print('data: ' + str(data))
+                            logging.info('data: ' + str(data))
                             break
 
                         local_timeout_count += 1
@@ -441,8 +441,8 @@ def main():
                     data = bot.read(bytes_to_read)
 
                     if (data == "throwDone"):
-                        print('data' + str(data))
-                        logging.info('data' + str(data))
+                        print('data: ' + str(data))
+                        logging.info('data: ' + str(data))
                         break
 
                     local_timeout_count += 1
@@ -486,8 +486,8 @@ def main():
                         data = bot.read(bytes_to_read)
 
                         if (data == "errorDone"):
-                            print('data' + str(data))
-                            logging.info('data' + str(data))
+                            print('data: ' + str(data))
+                            logging.info('data: ' + str(data))
                             break
 
                         local_timeout_count += 1
@@ -533,8 +533,8 @@ def main():
                     data = bot.read(bytes_to_read)
 
                     if (data == "moveDone"):
-                        print('data' + str(data))
-                        logging.info('data' + str(data))
+                        print('data: ' + str(data))
+                        logging.info('data: ' + str(data))
                         break
 
                     local_timeout_count += 1
@@ -592,8 +592,8 @@ def main():
                     data = bot.read(bytes_to_read)
 
                     if (data == "botResultDone"):
-                        print('data' + str(data))
-                        logging.info('data' + str(data))
+                        print('data: ' + str(data))
+                        logging.info('data: ' + str(data))
                         break
 
                     local_timeout_count += 1
@@ -634,8 +634,8 @@ def main():
                         data = bot.read(bytes_to_read)
 
                         if (data == "victoryDone"):
-                            print('data' + str(data))
-                            logging.info('data' + str(data))
+                            print('data: ' + str(data))
+                            logging.info('data: ' + str(data))
                             break
 
                         local_timeout_count += 1
