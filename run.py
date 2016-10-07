@@ -3,6 +3,7 @@
 from __future__ import division, print_function
 
 import os, sys, inspect, tty, termios, time, cPickle
+import logging
 
 from dotenv import load_dotenv
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
@@ -195,10 +196,13 @@ def get_fresh_model():
         'nn': []
     }
 
+logging.basicConfig(filename='roshambot.log', level=logging.INFO)
+
 try:
     bot = serial.Serial(os.environ.get("SERIAL_PORT"), 9600, timeout=1)
 except:
     print('Could not connect to Arduino.')
+    logging.info('Could not connect to Arduino.')
     raise
 
 try:
@@ -207,6 +211,7 @@ try:
     controller.add_listener(listener)
 except:
     print('Could not connect to Leap controller.')
+    logging.info('Could not connect to Leap controller.')
     raise
 
 
@@ -217,6 +222,7 @@ else:
         M = cPickle.load(open(PICKLE_FILE, 'rb'))
     except:
         print('Could not load pickled model. Starting fresh.')
+        logging.info('Could not load pickled model. Starting fresh.')
         M = get_fresh_model()
 
 current_play = None
@@ -260,10 +266,11 @@ def main():
 
             # wait to continue
             print('waiting for introDone')
+            logging.info('waiting for introDone')
             local_timeout_count = 0
             timeout = False
             while True:
-                print(local_timeout_count)
+                # print(local_timeout_count)
                 if local_timeout_count >= TIMEOUT_LENGTH:
                     timeout = True
                     break
@@ -273,13 +280,17 @@ def main():
 
                 if (data == "introDone"):
                     print('data' + str(data))
+                    logging.info('data' + str(data))
                     break
 
                 local_timeout_count += 1
                 time.sleep(0.1)
             print('postwait')
+            logging.info('postwait')
 
             if timeout:
+                print('timeout')
+                logging.info('timeout')
                 break # restart
 
             # reset game vars
@@ -303,10 +314,11 @@ def main():
 
                 # wait for start from arduino
                 print('waiting for wipeDone')
+                logging.info('waiting for wipeDone')
                 local_timeout_count = 0
                 timeout = False
                 while True:
-                    print(local_timeout_count)
+                    # print(local_timeout_count)
                     if local_timeout_count >= TIMEOUT_LENGTH:
                         timeout = True
                         break
@@ -316,13 +328,17 @@ def main():
 
                     if (data == "wipeDone"):
                         print('data' + str(data))
+                        logging.info('data' + str(data))
                         break
 
                     local_timeout_count += 1
                     time.sleep(0.1)
                 print('postwait')
+                logging.info('postwait')
 
                 if timeout:
+                    print('timeout')
+                    logging.info('timeout')
                     break # restart
 
                 # traverse history, updating weights (only if last game was not tie)
@@ -343,11 +359,13 @@ def main():
                         if concatted_row in M['nn'][depth]:
                             if DEBUG:
                                 print('incrementing: ', concatted_row, ' to a val of ', M['nn'][depth][concatted_row])
+                                logging.info('incrementing: ', concatted_row, ' to a val of ', M['nn'][depth][concatted_row])
 
                             M['nn'][depth][concatted_row] += 1
                         else:
                             if DEBUG:
                                 print('adding: ', concatted_row)
+                                logging.info('adding: ', concatted_row)
 
                             M['nn'][depth][concatted_row] = 1
 
@@ -364,10 +382,11 @@ def main():
 
                     # wait for start from arduino
                     print('waiting for any data')
+                    logging.info('waiting for any data')
                     local_timeout_count = 0
                     timeout = False
                     while True:
-                        print(local_timeout_count)
+                        # print(local_timeout_count)
                         if local_timeout_count >= TIMEOUT_LENGTH:
                             timeout = True
                             break
@@ -377,13 +396,17 @@ def main():
 
                         if (data):
                             print('data' + str(data))
+                            logging.info('data' + str(data))
                             break
 
                         local_timeout_count += 1
                         time.sleep(0.1)
                     print('postwait')
+                    logging.info('postwait')
 
                     if timeout:
+                        print('timeout')
+                        logging.info('timeout')
                         break # restart
 
                 # throw
@@ -391,10 +414,11 @@ def main():
 
                 # wait for start from arduino
                 print('waiting for throwDone')
+                logging.info('waiting for throwDone')
                 local_timeout_count = 0
                 timeout = False
                 while True:
-                    print(local_timeout_count)
+                    # print(local_timeout_count)
                     if local_timeout_count >= TIMEOUT_LENGTH:
                         timeout = True
                         break
@@ -404,13 +428,17 @@ def main():
 
                     if (data == "throwDone"):
                         print('data' + str(data))
+                        logging.info('data' + str(data))
                         break
 
                     local_timeout_count += 1
                     time.sleep(0.1)
                 print('postwait')
+                logging.info('postwait')
 
                 if timeout:
+                    print('timeout')
+                    logging.info('timeout')
                     break # restart
 
                 # use a move dict to get an average to make sure we're reading the input correctly
@@ -431,10 +459,11 @@ def main():
 
                     # wait for start from arduino
                     print('waiting for errorDone')
+                    logging.info('waiting for errorDone')
                     local_timeout_count = 0
                     timeout = False
                     while True:
-                        print(local_timeout_count)
+                        # print(local_timeout_count)
                         if local_timeout_count >= TIMEOUT_LENGTH:
                             timeout = True
                             break
@@ -444,13 +473,17 @@ def main():
 
                         if (data == "errorDone"):
                             print('data' + str(data))
+                            logging.info('data' + str(data))
                             break
 
                         local_timeout_count += 1
                         time.sleep(0.1)
                     print('postwait')
+                    logging.info('postwait')
 
                     if timeout:
+                        print('timeout')
+                        logging.info('timeout')
                         break # restart
 
                     if invalid_play_count >= 5:
@@ -464,17 +497,20 @@ def main():
                 player_move = dict_max(move_history)
 
                 print('player played ' + player_move)
+                logging.info('player played ' + player_move)
                 print('bot played ' + bot_move)
+                logging.info('bot played ' + bot_move)
 
                 # play bot move
                 bot_write(bot_move)
 
                 # wait for start from arduino
                 print('waiting for moveDone')
+                logging.info('waiting for moveDone')
                 local_timeout_count = 0
                 timeout = False
                 while True:
-                    print(local_timeout_count)
+                    # print(local_timeout_count)
                     if local_timeout_count >= TIMEOUT_LENGTH:
                         timeout = True
                         break
@@ -484,13 +520,17 @@ def main():
 
                     if (data == "moveDone"):
                         print('data' + str(data))
+                        logging.info('data' + str(data))
                         break
 
                     local_timeout_count += 1
                     time.sleep(0.1)
                 print('postwait')
+                logging.info('postwait')
 
                 if timeout:
+                    print('timeout')
+                    logging.info('timeout')
                     break # restart
 
                 # increment total number of games played by this model
@@ -525,10 +565,11 @@ def main():
 
                 # wait for start from arduino
                 print('waiting for botResultDone')
+                logging.info('waiting for botResultDone')
                 local_timeout_count = 0
                 timeout = False
                 while True:
-                    print(local_timeout_count)
+                    # print(local_timeout_count)
                     if local_timeout_count >= TIMEOUT_LENGTH:
                         timeout = True
                         break
@@ -538,13 +579,17 @@ def main():
 
                     if (data == "botResultDone"):
                         print('data' + str(data))
+                        logging.info('data' + str(data))
                         break
 
                     local_timeout_count += 1
                     time.sleep(0.1)
                 print('postwait')
+                logging.info('postwait')
 
                 if timeout:
+                    print('timeout')
+                    logging.info('timeout')
                     break # restart
 
                 if game['loss'] >= ROUNDS_TO_WIN or game['win'] >= ROUNDS_TO_WIN:
@@ -562,10 +607,11 @@ def main():
 
                     # wait for start from arduino
                     print('waiting for victoryDone')
+                    logging.info('waiting for victoryDone')
                     local_timeout_count = 0
                     timeout = False
                     while True:
-                        print(local_timeout_count)
+                        # print(local_timeout_count)
                         if local_timeout_count >= TIMEOUT_LENGTH:
                             timeout = True
                             break
@@ -575,11 +621,13 @@ def main():
 
                         if (data == "victoryDone"):
                             print('data' + str(data))
+                            logging.info('data' + str(data))
                             break
 
                         local_timeout_count += 1
                         time.sleep(0.1)
                     print('postwait')
+                    logging.info('postwait')
 
                     break
 
