@@ -3,3 +3,4 @@
 learning/
 venv/
 *.pk
+*.log
