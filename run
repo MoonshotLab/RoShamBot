@@ -1,8 +1,8 @@
 #!/bin/bash
 
-SCRIPTPATH=/Users/moonshot/roshambot;
+SCRIPTPATH=/Users/moonshot/Documents/roshambot;
 LEAPPATH=/Users/moonshot/Documents/LeapSDK/lib;
-MODELPATH=/Users/moonshot/roshambot/model.pk;
+MODELPATH=/Users/moonshot/Documents/roshambot/model.pk;
 LOADFRESH=False;
 
 cd $SCRIPTPATH;
