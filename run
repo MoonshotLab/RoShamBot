@@ -1,0 +1,19 @@
+#!/bin/bash
+
+SCRIPTPATH=/Users/prichey/moonshot/git/roshambot;
+LEAPPATH=/Users/prichey/Documents/src/LeapSDK/lib;
+MODELPATH=/Users/prichey/moonshot/git/roshambot/model.pk;
+LOADFRESH=False;
+
+cd $SCRIPTPATH;
+
+# maybe figure out a better way than doing this every time;
+# seems to be idempotent so I'm not worried about it
+virtualenv venv;
+source venv/bin/activate;
+pip install -r requirements.txt;
+
+ARDUINOPORT=$(platformio device list --json-output | python util/getport.py);
+
+platformio run -e uno;
+python roshambot.py --port $ARDUINOPORT --model $MODELPATH --loadfresh $LOADFRESH;
