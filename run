@@ -1,8 +1,8 @@
 #!/bin/bash
 
-SCRIPTPATH=/Users/prichey/moonshot/git/roshambot;
-LEAPPATH=/Users/prichey/Documents/src/LeapSDK/lib;
-MODELPATH=/Users/prichey/moonshot/git/roshambot/model.pk;
+SCRIPTPATH=/Users/moonshot/roshambot;
+LEAPPATH=/Users/moonshot/Documents/LeapSDK/lib;
+MODELPATH=/Users/moonshot/roshambot/model.pk;
 LOADFRESH=False;
 
 cd $SCRIPTPATH;
@@ -16,4 +16,4 @@ pip install -r requirements.txt;
 ARDUINOPORT=$(platformio device list --json-output | python util/getport.py);
 
 platformio run -e uno;
-python roshambot.py --port $ARDUINOPORT --model $MODELPATH --loadfresh $LOADFRESH;
+python roshambot.py --port $ARDUINOPORT --model $MODELPATH --loadfresh $LOADFRESH --leappath $LEAPPATH;

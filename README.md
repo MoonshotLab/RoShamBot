@@ -10,6 +10,7 @@
 * Leap Motion
     * [Desktop SDK](https://developer.leapmotion.com/v2)
     * Other libraries, as per https://api.leapmotion.com/documentation/python/devguide/Project_Setup.html
+* [Platformio](http://docs.platformio.org/en/stable/installation.html)
 
 ### Config
 * Be sure to update the paths in `run` to match your current setup.
