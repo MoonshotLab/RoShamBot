@@ -276,7 +276,7 @@ def main():
                         time.sleep(sleep_timing)
 
             # bot hand test + countdown * 1
-            # bot_write('botHandTest')
+            bot_write('botHandTest')
             #
             # # wait to continue
             # print('waiting for introDone')

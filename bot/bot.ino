@@ -319,7 +319,7 @@ void countdownThrow(bool user) {
     strip.setPixelColor(posBot, white);
   }
   strip.show();
-  delay(throwDelay);
+  delay(1000);
   neoWipe();
 
   Serial.write("throwDone");
@@ -449,6 +449,25 @@ void displayFillRing() {
 }
 
 void botHandIntro() {
+  neoWipe();
+
+  int flashRepeat = 3;
+  uint32_t flashColors[3] = {red, green, blue};
+  for (int j = 0; j < flashRepeat; j++) {
+    for (int i = 0; i < halfNeoLength; i++) {
+      int posUser = i + userPixelOffset;
+      strip.setPixelColor(posUser, flashColors[j]);
+      int posBot = i + botPixelOffset;
+      strip.setPixelColor(posBot, flashColors[j]);
+    }
+    strip.show();
+    delay(100);
+  }
+
+  neoWipe();
+}
+
+void botHandIntroOld() {
   neoWipe();
 
   int flashRepeat = 3;
@@ -649,6 +668,7 @@ void loop() {
     displayFillRing();
   } else if (input == 19) {
     currentMode = 2;
+    // botHandIntroOld();
     botHandIntro();
     readyCount = 0;
 
