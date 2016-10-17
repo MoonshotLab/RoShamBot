@@ -276,36 +276,36 @@ def main():
                         time.sleep(sleep_timing)
 
             # bot hand test + countdown * 1
-            bot_write('botHandTest')
-
-            # wait to continue
-            print('waiting for introDone')
-            logging.info('waiting for introDone')
-            local_timeout_count = 0
-            timeout = False
-            while True:
-                # print(local_timeout_count)
-                if local_timeout_count >= TIMEOUT_LENGTH:
-                    timeout = True
-                    break
-
-                bytes_to_read = bot.inWaiting()
-                data = bot.read(bytes_to_read)
-
-                if (data == "introDone"):
-                    print('data: ' + str(data))
-                    logging.info('data: ' + str(data))
-                    break
-
-                local_timeout_count += 1
-                time.sleep(0.1)
-            print('postwait')
-            logging.info('postwait')
-
-            if timeout:
-                print('timeout')
-                logging.info('timeout')
-                break # restart
+            # bot_write('botHandTest')
+            #
+            # # wait to continue
+            # print('waiting for introDone')
+            # logging.info('waiting for introDone')
+            # local_timeout_count = 0
+            # timeout = False
+            # while True:
+            #     # print(local_timeout_count)
+            #     if local_timeout_count >= TIMEOUT_LENGTH:
+            #         timeout = True
+            #         break
+            #
+            #     bytes_to_read = bot.inWaiting()
+            #     data = bot.read(bytes_to_read)
+            #
+            #     if (data == "introDone"):
+            #         print('data: ' + str(data))
+            #         logging.info('data: ' + str(data))
+            #         break
+            #
+            #     local_timeout_count += 1
+            #     time.sleep(0.1)
+            # print('postwait')
+            # logging.info('postwait')
+            #
+            # if timeout:
+            #     print('timeout')
+            #     logging.info('timeout')
+            #     break # restart
 
             # reset game vars
             game = {}

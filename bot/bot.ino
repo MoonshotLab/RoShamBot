@@ -131,7 +131,7 @@ void lightPlayerThird(int segment, uint32_t color, bool wipe) {
   segment = segment % 3;
 
   for (int i = 0; i < halfNeoLength / 3; i++) {
-    int pos = (halfNeoLength / 3 * segment) + i;
+    int pos = (halfNeoLength / 3 * segment) + userPixelOffset + i;
     strip.setPixelColor(pos, color);
   }
 
@@ -376,10 +376,10 @@ void displayScore(int playerScore, int botScore) {
   char playerScoreChar = playerScore + '0';
   char botScoreChar = botScore + '0';
 
-  alpha4.writeDigitAscii(0, playerScoreChar); // convert to char
+  alpha4.writeDigitAscii(0, botScoreChar); // convert to char
   alpha4.writeDigitAscii(1, ' ');
   alpha4.writeDigitAscii(2, ' ');
-  alpha4.writeDigitAscii(3, botScoreChar); // covert to char
+  alpha4.writeDigitAscii(3, playerScoreChar); // covert to char
   alpha4.writeDisplay();
 }
 
@@ -513,7 +513,7 @@ void botHandIntro() {
   }
 
   displayChars('P', 'L', 'A', 'Y');
-  delay(timingDelay / 2);
+  delay(timingDelay);
   wipeDisplay();
 
   neoWipe();
