@@ -545,7 +545,7 @@ void botHandIntroOld() {
 void playerVictor(bool playerWon, uint32_t c, uint8_t wait) {
   neoWipe();
 
-  for (int j=0; j<20; j++) {  //do 10 cycles of chasing
+  for (int j=0; j<40; j++) {  //do 40 cycles of chasing
     for (int q=0; q < 3; q++) {
       if (playerWon) {
         for (uint16_t i=0; i < halfNeoLength; i = i + 3) {
