@@ -2,7 +2,7 @@
 
 from __future__ import division, print_function
 
-import os, sys, inspect, tty, termios, time, cPickle, argparse, logging
+import os, sys, inspect, tty, termios, time, cPickle, argparse, logging, subprocess
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-p', '--port', dest='port', help='Arduino port', required=True)
@@ -119,6 +119,15 @@ def get_guess(history, model):
 
 def str_to_bool(val):
     return val == 'True'
+
+def playsound(file):
+    subprocess.call(['afplay', file])
+
+def short_beep():
+    playsound('assets/shortbeep.wav')
+
+def long_beep():
+    playsound('assets/longbeep.wav')
 
 def get_possible_plays(query, model):
     plays = {}
@@ -401,6 +410,7 @@ def main():
                 # countdown
                 for i in range(3):
                     bot_write(COUNTDOWN_MAP[i])
+                    short_beep()
                     time.sleep(TIME_BETWEEN_MOVES / 3.0)
 
                     # wait for start from arduino
@@ -434,6 +444,7 @@ def main():
 
                 # throw
                 bot_write(COUNTDOWN_MAP['throw'])
+                long_beep()
 
                 # wait for start from arduino
                 print('waiting for throwDone')
