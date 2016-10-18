@@ -1,28 +1,20 @@
 ## ROSHAMBOT 3000
 
+![Alt text](/assets/roshambot.jpg?raw=true "Roshambot")
+
 ### Requirements
 * Python (2.7)
+    * [pip](https://pip.pypa.io/en/stable/installing/)
+    * [virtualenv](https://virtualenv.pypa.io/en/stable/installation/)
     * Package requirements listed in `requirements.txt`. (`pip install -r requirements.txt`)
-* Arduino Libraries
-    * Adafruit [LED Backpack library](https://github.com/adafruit/Adafruit-LED-Backpack-Library/archive/master.zip)
-    * Adafruit [GFX Library](https://github.com/adafruit/Adafruit-GFX-Library/archive/master.zip)
-    * Adafruit [NeoPixel Library](https://github.com/adafruit/Adafruit_NeoPixel/archive/master.zip)
 * Leap Motion
     * [Desktop SDK](https://developer.leapmotion.com/v2)
     * Other libraries, as per https://api.leapmotion.com/documentation/python/devguide/Project_Setup.html
+* [Platformio](http://docs.platformio.org/en/stable/installation.html)
 
-### .env
-Add a `.env` file at the root, with the following variables (obviously, update to fit your setup and needs):
-```
-SERIAL_PORT="/dev/cu.usbmodem1411"
-LEAP_SDK_LOCATION="/Users/moonshot/Documents/src/LeapSDK/lib"
-
-LOAD_FRESH=True
-CONNECT_TO_ARDUINO=True
-LEAP_CONTROL=True
-DEBUG=True
-```
+### Config
+* Be sure to update the paths in `run` to match your current setup.
+* YMMV.
 
 ### Do tha thang
-* Upload `bot/bot.ino` to your Arduino.
-* Run `python run.py`
+* `source run`

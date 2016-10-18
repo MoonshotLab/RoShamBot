@@ -2,15 +2,24 @@
 
 from __future__ import division, print_function
 
-import os, sys, inspect, tty, termios, time, cPickle
-import logging
+import os, sys, inspect, tty, termios, time, cPickle, argparse, logging
 
-from dotenv import load_dotenv
-dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
-load_dotenv(dotenv_path)
+parser = argparse.ArgumentParser()
+parser.add_argument('-p', '--port', dest='port', help='Arduino port', required=True)
+parser.add_argument('-m', '--model', dest='model', help='Model path')
+parser.add_argument('-l', '--logpath', dest='logpath', help='Log path')
+parser.add_argument('-lf', '--loadfresh', dest='fresh', help='Load fresh')
+parser.add_argument('-lp', '--leappath', dest='leappath', help='Lead SDK path', required=True)
+args = parser.parse_args()
+
+if args.logpath:
+    logpath = args.logpath
+else:
+    logpath = 'roshambot.log'
+logging.basicConfig(filename=logpath, level=logging.INFO)
 
 src_dir = os.path.dirname(inspect.getfile(inspect.currentframe()))
-lib_dir = os.path.abspath(os.path.join(src_dir, os.environ.get("LEAP_SDK_LOCATION")))
+lib_dir = os.path.abspath(os.path.join(src_dir, args.leappath))
 sys.path.insert(0, lib_dir)
 import Leap
 
@@ -25,13 +34,6 @@ MEMORY = 5
 ROUNDS_TO_WIN = 3
 TIME_BETWEEN_MOVES = 2
 TIMEOUT_LENGTH = 1000
-
-LOAD_FRESH = str_to_bool(os.environ.get("LOAD_FRESH"))
-CONNECT_TO_ARDUINO = str_to_bool(os.environ.get("CONNECT_TO_ARDUINO"))
-PLAY_TUTORIAL = str_to_bool(os.environ.get("PLAY_TUTORIAL"))
-DEBUG = str_to_bool(os.environ.get("DEBUG"))
-
-PICKLE_FILE = 'model.pk'
 
 ROOT = '0'
 CHOICES = ['r', 'p', 's']
@@ -137,8 +139,7 @@ def get_concatted_history(history, depth):
         return concat_row(history[0:depth])
 
 def bot_write(msg):
-    if DEBUG:
-        print(msg, SERIAL_MAP[msg])
+    print(msg, SERIAL_MAP[msg])
 
     try:
         bot.write(struct.pack('>B', SERIAL_MAP[msg]))
@@ -147,8 +148,7 @@ def bot_write(msg):
         raise
 
 def bot_write_raw(msg):
-    if DEBUG:
-        print(msg)
+    print(msg)
 
     try:
         bot.write(struct.pack('>B', msg))
@@ -210,10 +210,25 @@ def get_fresh_model():
         'nn': []
     }
 
-logging.basicConfig(filename='roshambot.log', level=logging.INFO)
+try:
+    if str_to_bool(args.fresh):
+        LOAD_FRESH = True
+    else:
+        LOAD_FRESH = False
+except:
+    LOAD_FRESH = False
 
 try:
-    bot = serial.Serial(os.environ.get("SERIAL_PORT"), 9600, timeout=1)
+    if args.model:
+        PICKLE_FILE = args.model
+    else:
+        PICKLE_FILE = 'model.pk'
+except:
+    PICKLE_FILE = 'model.pk'
+
+
+try:
+    bot = serial.Serial(args.port, 9600, timeout=1)
 except:
     print('Could not connect to Arduino.')
     logging.info('Could not connect to Arduino.')
@@ -371,16 +386,10 @@ def main():
                         concatted_row = concatted_row[::-1] # look backwards in history for most likely next play
 
                         if concatted_row in M['nn'][depth]:
-                            if DEBUG:
-                                print('incrementing: ', concatted_row, ' to a val of ', M['nn'][depth][concatted_row])
-                                # logging.info('incrementing: ', concatted_row, ' to a val of ', M['nn'][depth][concatted_row])
-
+                            print('incrementing: ', concatted_row, ' to a val of ', M['nn'][depth][concatted_row])
                             M['nn'][depth][concatted_row] += 1
                         else:
-                            if DEBUG:
-                                print('adding: ', concatted_row)
-                                # logging.info('adding: ', concatted_row)
-
+                            print('adding: ', concatted_row)
                             M['nn'][depth][concatted_row] = 1
 
                         nodes.pop() # pop off
@@ -607,10 +616,9 @@ def main():
                     break # restart
 
                 if game['loss'] >= ROUNDS_TO_WIN or game['win'] >= ROUNDS_TO_WIN:
-                    if DEBUG:
-                        print(M['record'])
-                        for model_level in M['nn']:
-                            print(model_level)
+                    print(M['record'])
+                    for model_level in M['nn']:
+                        print(model_level)
 
                     # flash winner
                     if game['loss'] >= ROUNDS_TO_WIN:

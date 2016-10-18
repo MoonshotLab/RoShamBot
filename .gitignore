@@ -1,6 +1,7 @@
 .env
 .DS_Store
-learning/
 venv/
 *.pk
 *.log
+.pioenvs
+.piolibdeps
