@@ -85,6 +85,39 @@ class SampleListener(Leap.Listener):
         else:
             return False
 
+def waitFor(thing, picky = False):
+    """
+    returns True if correct result was received within time limit
+    else False
+    """
+    if not picky:
+        something = "anything"
+
+    print('waiting for ' + something)
+    logging.info('waiting for ' + something)
+    timeout_count = 0
+
+    while True:
+        if timeout_count >= TIMEOUT_LENGTH:
+            return False
+
+        bytes_to_read = bot.inWaiting()
+        data = bot.read(bytes_to_read)
+
+        if not picky or data == something:
+            print('received data: ' + str(data))
+            logging.info('received data: ' + str(data))
+            return True
+
+        timeout_count += 1
+        time.sleep(0.1)
+
+def waitForSomething(something):
+    waitFor(something, True)
+
+def waitForAnything():
+    waitFor(_, False)
+
 # ['p', 'r', 's'] => 'prs'
 def concat_row(lst):
     return_string = ''
@@ -299,37 +332,7 @@ def main():
                         ready_count -= 1
                         time.sleep(sleep_timing)
 
-            # bot hand test + countdown * 1
             bot_write('botHandTest')
-            #
-            # # wait to continue
-            # print('waiting for introDone')
-            # logging.info('waiting for introDone')
-            # local_timeout_count = 0
-            # timeout = False
-            # while True:
-            #     # print(local_timeout_count)
-            #     if local_timeout_count >= TIMEOUT_LENGTH:
-            #         timeout = True
-            #         break
-            #
-            #     bytes_to_read = bot.inWaiting()
-            #     data = bot.read(bytes_to_read)
-            #
-            #     if (data == "introDone"):
-            #         print('data: ' + str(data))
-            #         logging.info('data: ' + str(data))
-            #         break
-            #
-            #     local_timeout_count += 1
-            #     time.sleep(0.1)
-            # print('postwait')
-            # logging.info('postwait')
-            #
-            # if timeout:
-            #     print('timeout')
-            #     logging.info('timeout')
-            #     break # restart
 
             # reset game vars
             game = {}
@@ -351,30 +354,12 @@ def main():
                 bot_write('clearPlay')
 
                 # wait for start from arduino
-                print('waiting for wipeDone')
-                logging.info('waiting for wipeDone')
-                local_timeout_count = 0
-                timeout = False
-                while True:
-                    # print(local_timeout_count)
-                    if local_timeout_count >= TIMEOUT_LENGTH:
-                        timeout = True
-                        break
+                waitResult = waitForSomething("wipeDone")
 
-                    bytes_to_read = bot.inWaiting()
-                    data = bot.read(bytes_to_read)
-
-                    if (data == "wipeDone"):
-                        print('data: ' + str(data))
-                        logging.info('data: ' + str(data))
-                        break
-
-                    local_timeout_count += 1
-                    time.sleep(0.1)
                 print('postwait')
                 logging.info('postwait')
 
-                if timeout:
+                if not waitResult:
                     print('timeout')
                     logging.info('timeout')
                     break # restart
@@ -414,30 +399,12 @@ def main():
                     time.sleep(TIME_BETWEEN_MOVES / 3.0)
 
                     # wait for start from arduino
-                    print('waiting for any data')
-                    logging.info('waiting for any data')
-                    local_timeout_count = 0
-                    timeout = False
-                    while True:
-                        # print(local_timeout_count)
-                        if local_timeout_count >= TIMEOUT_LENGTH:
-                            timeout = True
-                            break
+                    waitResult = waitForAnything()
 
-                        bytes_to_read = bot.inWaiting()
-                        data = bot.read(bytes_to_read)
-
-                        if (data):
-                            print('data: ' + str(data))
-                            logging.info('data: ' + str(data))
-                            break
-
-                        local_timeout_count += 1
-                        time.sleep(0.1)
                     print('postwait')
                     logging.info('postwait')
 
-                    if timeout:
+                    if not waitResult:
                         print('timeout')
                         logging.info('timeout')
                         break # restart
@@ -447,30 +414,12 @@ def main():
                 long_beep()
 
                 # wait for start from arduino
-                print('waiting for throwDone')
-                logging.info('waiting for throwDone')
-                local_timeout_count = 0
-                timeout = False
-                while True:
-                    # print(local_timeout_count)
-                    if local_timeout_count >= TIMEOUT_LENGTH:
-                        timeout = True
-                        break
+                waitResult = waitForSomething("throwDone")
 
-                    bytes_to_read = bot.inWaiting()
-                    data = bot.read(bytes_to_read)
-
-                    if (data == "throwDone"):
-                        print('data: ' + str(data))
-                        logging.info('data: ' + str(data))
-                        break
-
-                    local_timeout_count += 1
-                    time.sleep(0.1)
                 print('postwait')
                 logging.info('postwait')
 
-                if timeout:
+                if not waitResult:
                     print('timeout')
                     logging.info('timeout')
                     break # restart
@@ -492,30 +441,12 @@ def main():
                     invalid_play_count += 1
 
                     # wait for start from arduino
-                    print('waiting for errorDone')
-                    logging.info('waiting for errorDone')
-                    local_timeout_count = 0
-                    timeout = False
-                    while True:
-                        # print(local_timeout_count)
-                        if local_timeout_count >= TIMEOUT_LENGTH:
-                            timeout = True
-                            break
+                    waitResult = waitForSomething("errorDone")
 
-                        bytes_to_read = bot.inWaiting()
-                        data = bot.read(bytes_to_read)
-
-                        if (data == "errorDone"):
-                            print('data: ' + str(data))
-                            logging.info('data: ' + str(data))
-                            break
-
-                        local_timeout_count += 1
-                        time.sleep(0.1)
                     print('postwait')
                     logging.info('postwait')
 
-                    if timeout:
+                    if not waitResult:
                         print('timeout')
                         logging.info('timeout')
                         break # restart
@@ -539,30 +470,12 @@ def main():
                 bot_write(bot_move)
 
                 # wait for start from arduino
-                print('waiting for moveDone')
-                logging.info('waiting for moveDone')
-                local_timeout_count = 0
-                timeout = False
-                while True:
-                    # print(local_timeout_count)
-                    if local_timeout_count >= TIMEOUT_LENGTH:
-                        timeout = True
-                        break
+                waitResult = waitForSomething("moveDone")
 
-                    bytes_to_read = bot.inWaiting()
-                    data = bot.read(bytes_to_read)
-
-                    if (data == "moveDone"):
-                        print('data: ' + str(data))
-                        logging.info('data: ' + str(data))
-                        break
-
-                    local_timeout_count += 1
-                    time.sleep(0.1)
                 print('postwait')
                 logging.info('postwait')
 
-                if timeout:
+                if not waitResult:
                     print('timeout')
                     logging.info('timeout')
                     break # restart
@@ -598,30 +511,12 @@ def main():
                     bot_write('botWin')
 
                 # wait for start from arduino
-                print('waiting for botResultDone')
-                logging.info('waiting for botResultDone')
-                local_timeout_count = 0
-                timeout = False
-                while True:
-                    # print(local_timeout_count)
-                    if local_timeout_count >= TIMEOUT_LENGTH:
-                        timeout = True
-                        break
+                waitResult = waitForSomething("botResultDone")
 
-                    bytes_to_read = bot.inWaiting()
-                    data = bot.read(bytes_to_read)
-
-                    if (data == "botResultDone"):
-                        print('data: ' + str(data))
-                        logging.info('data: ' + str(data))
-                        break
-
-                    local_timeout_count += 1
-                    time.sleep(0.1)
                 print('postwait')
                 logging.info('postwait')
 
-                if timeout:
+                if not waitResult:
                     print('timeout')
                     logging.info('timeout')
                     break # restart
@@ -639,26 +534,8 @@ def main():
                         bot_write('botVictory')
 
                     # wait for start from arduino
-                    print('waiting for victoryDone')
-                    logging.info('waiting for victoryDone')
-                    local_timeout_count = 0
-                    timeout = False
-                    while True:
-                        # print(local_timeout_count)
-                        if local_timeout_count >= TIMEOUT_LENGTH:
-                            timeout = True
-                            break
+                    waitResult = waitForSomething("victoryDone")
 
-                        bytes_to_read = bot.inWaiting()
-                        data = bot.read(bytes_to_read)
-
-                        if (data == "victoryDone"):
-                            print('data: ' + str(data))
-                            logging.info('data: ' + str(data))
-                            break
-
-                        local_timeout_count += 1
-                        time.sleep(0.1)
                     print('postwait')
                     logging.info('postwait')
 
