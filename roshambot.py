@@ -154,7 +154,7 @@ def str_to_bool(val):
     return val == 'True'
 
 def playsound(file):
-    subprocess.call(['afplay', file])
+    subprocess.Popen(['afplay', file])
 
 def short_beep():
     playsound('assets/shortbeep.wav')
@@ -394,8 +394,8 @@ def main():
 
                 # countdown
                 for i in range(3):
-                    bot_write(COUNTDOWN_MAP[i])
                     short_beep()
+                    bot_write(COUNTDOWN_MAP[i])
                     time.sleep(TIME_BETWEEN_MOVES / 3.0)
 
                     # wait for start from arduino
@@ -410,8 +410,8 @@ def main():
                         break # restart
 
                 # throw
-                bot_write(COUNTDOWN_MAP['throw'])
                 long_beep()
+                bot_write(COUNTDOWN_MAP['throw'])
 
                 # wait for start from arduino
                 waitResult = waitForSomething("throwDone")

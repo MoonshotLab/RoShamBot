@@ -319,7 +319,7 @@ void countdownThrow(bool user) {
     strip.setPixelColor(posBot, white);
   }
   strip.show();
-  delay(1000);
+  delay(250);
   neoWipe();
 
   Serial.write("throwDone");
@@ -688,10 +688,13 @@ void loop() {
         break;
     }
 
+
+
     playerScore = 0;
     botScore = 0;
 
     hideDisplay();
+    playNeutral();
 
     delay(250);
     Serial.write("victoryDone");
