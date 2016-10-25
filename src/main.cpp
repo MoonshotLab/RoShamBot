@@ -16,11 +16,16 @@ int currentMode = 0;
 int playerScore = 0;
 int botScore = 0;
 
+bool sleeping = false;
+
 int readyCount = 0; // fill ring to start game
 
 int pos = 0;    // variable to store the servo position
 int upperFingersPin = 8;
 int lowerFingersPin = 7;
+
+int resetButtonPin = 4;
+int resetButtonState = 0;
 
 #define NEOPIN 6
 int fullNeoLength = 50;
@@ -582,10 +587,22 @@ void hideDisplay() {
   alpha4.writeDisplay();
 }
 
+void reset() {
+  currentMode = -1;
+  sleeping = true;
+  playerScore = 0;
+  botScore = 0;
+
+  hideDisplay();
+  playNeutral();
+}
+
 
 void setup() {
   // exit(0);
   Serial.begin(9600);
+
+  pinMode(resetButtonPin, INPUT);
 
   alpha4.begin(0x70);  // pass in the address
   alpha4.clear();
@@ -603,7 +620,15 @@ void setup() {
 
 void loop() {
   while(Serial.available()==0){
-    if (currentMode == 0) {
+    buttonState = digitalRead(resetButtonPin);
+
+    if (buttonState == HIGH) {
+      sleeping = false;
+      Serial.write("reset");
+      delay(100);
+    }
+
+    if (!sleeping && currentMode == 0) {
       rainbowCycleInc(rainbowInc++, 20);
 
       if (rainbowInc > 255) {
@@ -688,14 +713,7 @@ void loop() {
         break;
     }
 
-
-
-    playerScore = 0;
-    botScore = 0;
-
-    hideDisplay();
-    playNeutral();
-
+    reset();
     delay(250);
     Serial.write("victoryDone");
   } else if (input >= 24 && input < 27) {
@@ -765,5 +783,9 @@ void loop() {
     hideDisplay();
     delay(100);
     Serial.write("displayCleared");
+  } else if (input == 37) {
+    reset();
+    delay(100);
+    Serial.write("resetDone");
   }
 }

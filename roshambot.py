@@ -34,6 +34,7 @@ MEMORY = 5
 ROUNDS_TO_WIN = 3
 TIME_BETWEEN_MOVES = 2
 TIMEOUT_LENGTH = 1000
+SLEEP_DELTA = 60 * 5 # wait 5 minutes before sleeping
 
 ROOT = '0'
 CHOICES = ['r', 'p', 's']
@@ -54,7 +55,8 @@ SERIAL_MAP = {
     'playerWinPaper': 27, 'playerTiePaper': 28, 'playerLosePaper': 29,
     'playerWinScissors': 30, 'playerTieScissors': 31, 'playerLoseScissors': 32,
     'botWin': 33, 'botTie': 34, 'botLose': 35,
-    'clearDisplay': 36
+    'clearDisplay': 36,
+    'reset': 37
 }
 
 COUNTDOWN_MAP = {0: 'countOne', 1: 'countTwo', 2: 'countThree', 'throw': 'countThrow'}
@@ -85,7 +87,7 @@ class SampleListener(Leap.Listener):
         else:
             return False
 
-def waitFor(thing, picky = False):
+def waitFor(thing, picky = False, indefinitely = False):
     """
     returns True if correct result was received within time limit
     else False
@@ -98,11 +100,14 @@ def waitFor(thing, picky = False):
     timeout_count = 0
 
     while True:
-        if timeout_count >= TIMEOUT_LENGTH:
+        if not indefinitely and timeout_count >= TIMEOUT_LENGTH:
             return False
 
         bytes_to_read = bot.inWaiting()
         data = bot.read(bytes_to_read)
+
+        if data == "reset":
+            return False
 
         if not picky or data == something:
             print('received data: ' + str(data))
@@ -112,11 +117,11 @@ def waitFor(thing, picky = False):
         timeout_count += 1
         time.sleep(0.1)
 
-def waitForSomething(something):
-    waitFor(something, True)
+def waitForSomething(something, indefinitely = False):
+    waitFor(something, True, indefinitely)
 
-def waitForAnything():
-    waitFor(_, False)
+def waitForAnything(indefinitely = False):
+    waitFor(_, False, indefinitely)
 
 # ['p', 'r', 's'] => 'prs'
 def concat_row(lst):
@@ -302,6 +307,14 @@ def main():
     try:
         # can't stop won't stop
         while True:
+            try:
+                if sleeping:
+                    print('going to sleep')
+                    logging.info('going to sleep')
+                    waitForSomething("reset", True) # indefinitely wait for reset
+            except:
+                sleeping = False
+
             bot_write('clearPlay')
 
             # enticing glow
@@ -311,8 +324,17 @@ def main():
             # user hand -> fill ring -> start game
             ready_count = 0
             ready_limit = 20
+
+            # record time before entering loop so we can go to sleep after 5 minutes
+            start_time = time.time()
+
             while True:
                 if ready_count >= ready_limit:
+                    break
+
+                if time.time() - start_time >= SLEEP_DELTA:
+                    sleeping = True
+                    bot_write('reset')
                     break
 
                 frame = controller.frame()
@@ -331,6 +353,9 @@ def main():
                         bot_write('fillRingDec')
                         ready_count -= 1
                         time.sleep(sleep_timing)
+
+            if sleeping:
+                break
 
             bot_write('botHandTest')
 
