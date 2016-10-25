@@ -620,9 +620,9 @@ void setup() {
 
 void loop() {
   while(Serial.available()==0){
-    buttonState = digitalRead(resetButtonPin);
+    resetButtonState = digitalRead(resetButtonPin);
 
-    if (buttonState == HIGH) {
+    if (resetButtonState == HIGH) {
       sleeping = false;
       Serial.write("reset");
       delay(100);
