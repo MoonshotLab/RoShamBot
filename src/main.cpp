@@ -24,7 +24,7 @@ int pos = 0;    // variable to store the servo position
 int upperFingersPin = 8;
 int lowerFingersPin = 7;
 
-int resetButtonPin = 4;
+int resetButtonPin = 12;
 int resetButtonState = 0;
 
 #define NEOPIN 6
