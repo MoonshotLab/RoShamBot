@@ -28,7 +28,7 @@ int resetButtonPin = 12;
 int resetButtonState = 0;
 
 int ledRelayPin = 3;
-int servoRelayPin = 4;
+int servoRelayPin = 3;
 
 #define NEOPIN 6
 int fullNeoLength = 50;
@@ -598,6 +598,7 @@ void reset() {
 
   hideDisplay();
   playNeutral();
+  relaysOff();
 }
 
 void relaysOn() {
@@ -639,16 +640,13 @@ void loop() {
 
     if (resetButtonState == HIGH) {
       sleeping = false;
+      relaysOn();
       Serial.write("reset");
       delay(100);
-    } else {
-      relaysOff();
     }
 
     delay(250);
   }
-
-  relaysOn();
 
   if(Serial.available()==0) {
     resetButtonState = digitalRead(resetButtonPin);
