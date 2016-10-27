@@ -27,6 +27,9 @@ int lowerFingersPin = 7;
 int resetButtonPin = 12;
 int resetButtonState = 0;
 
+int ledRelayPin = 3;
+int servoRelayPin = 4;
+
 #define NEOPIN 6
 int fullNeoLength = 50;
 int neoLength = 42;
@@ -597,12 +600,24 @@ void reset() {
   playNeutral();
 }
 
+void relaysOn() {
+  digitalWrite(ledRelayPin, HIGH);
+  digitalWrite(servoRelayPin, HIGH);
+}
+
+void relaysOff() {
+  digitalWrite(ledRelayPin, LOW);
+  digitalWrite(servoRelayPin, LOW);
+}
+
 
 void setup() {
   // exit(0);
   Serial.begin(9600);
 
   pinMode(resetButtonPin, INPUT);
+  pinMode(ledRelayPin, OUTPUT);
+  pinMode(servoRelayPin, OUTPUT);
 
   alpha4.begin(0x70);  // pass in the address
   alpha4.clear();
@@ -619,7 +634,23 @@ void setup() {
 }
 
 void loop() {
-  while(Serial.available()==0){
+  while (sleeping) {
+    resetButtonState = digitalRead(resetButtonPin);
+
+    if (resetButtonState == HIGH) {
+      sleeping = false;
+      Serial.write("reset");
+      delay(100);
+    } else {
+      relaysOff();
+    }
+
+    delay(250);
+  }
+
+  relaysOn();
+
+  if(Serial.available()==0) {
     resetButtonState = digitalRead(resetButtonPin);
 
     if (resetButtonState == HIGH) {
@@ -637,155 +668,155 @@ void loop() {
     }
 
     delay(10);
-  }
+  } else {
+    int input = Serial.read();
 
-  int input = Serial.read();
+    Serial.println(input);
 
-  Serial.println(input);
+    if (input >= 0 && input < 4) {
+      playMove(input);
+    } else if (input >= 4 && input < 12) {
+      lightNeoRing(input);
+    } else if (input >= 12 && input < 15) {
+      switch(input) {
+        case 12:
+          playerScore++;
+          break;
+        case 13:
+          botScore++;
+          break;
+        case 14:
+          // reset both scores
+          playerScore = 0;
+          botScore = 0;
+          break;
+      }
 
-  if (input >= 0 && input < 4) {
-    playMove(input);
-  } else if (input >= 4 && input < 12) {
-    lightNeoRing(input);
-  } else if (input >= 12 && input < 15) {
-    switch(input) {
-      case 12:
-        playerScore++;
-        break;
-      case 13:
-        botScore++;
-        break;
-      case 14:
-        // reset both scores
-        playerScore = 0;
-        botScore = 0;
-        break;
+      displayScore(playerScore, botScore);
+    } else if (input == 15) {
+      // clear display
+      currentMode = -1;
+      neoWipe();
+      delay(250);
+      Serial.write("wipeDone");
+    } else if (input == 16) {
+      currentMode = 0; // rainbow cycle
+      playerScore = 0;
+      botScore = 0;
+    } else if (input >= 17 && input < 19) {
+      currentMode = 1;
+      switch(input) {
+        case 17:
+          // fill ring inc
+          readyCount++;
+          break;
+        case 18:
+          // fill ring dec
+          readyCount--;
+
+          if (readyCount == 0) {
+            currentMode = 0; // rainbow cycle
+          }
+          break;
+      }
+
+      displayFillRing();
+    } else if (input == 19) {
+      currentMode = 2;
+      // botHandIntroOld();
+      botHandIntro();
+      readyCount = 0;
+
+    } else if (input == 20) {
+      // playerWinsOverall(); // remove
+    } else if (input == 21) {
+      // botWinsOverall(); // remove
+    } else if (input == 22 || input == 23) {
+      switch(input) {
+        case 22:
+          // player wins
+          playerVictor(true, green, 20);
+          break;
+        case 23:
+          // bot wins
+          playerVictor(false, green, 20);
+          break;
+      }
+
+      reset();
+      delay(250);
+      Serial.write("victoryDone");
+    } else if (input >= 24 && input < 27) {
+      switch(input) {
+        case 24:
+          // player win rock
+          readPlayerRock(1, false);
+          break;
+        case 25:
+          // player tie rock
+          readPlayerRock(0, false);
+          break;
+        case 26:
+          // player lose rock
+          readPlayerRock(-1, false);
+          break;
+      }
+    } else if (input >= 27 && input < 30) {
+      switch(input) {
+        case 27:
+          // player win paper
+          readPlayerPaper(1, false);
+          break;
+        case 28:
+          // player tie paper
+          readPlayerPaper(0, false);
+          break;
+        case 29:
+          // player lose paper
+          readPlayerPaper(-1, false);
+          break;
+      }
+    } else if (input >= 30 && input < 33) {
+      switch(input) {
+        case 30:
+          // player win scissors
+          readPlayerScissors(1, false);
+          break;
+        case 31:
+          // player tie scissors
+          readPlayerScissors(0, false);
+          break;
+        case 32:
+          // player lose scissors
+          readPlayerScissors(-1, false);
+          break;
+      }
+    } else if (input >= 33 && input < 36) {
+      switch(input) {
+        case 33:
+          // bot win
+          lightBotRing(green, false);
+          break;
+        case 34:
+          // bot tie
+          lightBotRing(purple, false);
+          break;
+        case 35:
+          // bot lose
+          lightBotRing(red, false);
+          break;
+      }
+
+      delay(250);
+      Serial.write("botResultDone");
+    } else if (input == 36) {
+      hideDisplay();
+      delay(100);
+      Serial.write("displayCleared");
+    } else if (input == 37) {
+      reset();
+      delay(100);
+      Serial.write("resetDone");
     }
-
-    displayScore(playerScore, botScore);
-  } else if (input == 15) {
-    // clear display
-    currentMode = -1;
-    neoWipe();
-    delay(250);
-    Serial.write("wipeDone");
-  } else if (input == 16) {
-    currentMode = 0; // rainbow cycle
-    playerScore = 0;
-    botScore = 0;
-  } else if (input >= 17 && input < 19) {
-    currentMode = 1;
-    switch(input) {
-      case 17:
-        // fill ring inc
-        readyCount++;
-        break;
-      case 18:
-        // fill ring dec
-        readyCount--;
-
-        if (readyCount == 0) {
-          currentMode = 0; // rainbow cycle
-        }
-        break;
-    }
-
-    displayFillRing();
-  } else if (input == 19) {
-    currentMode = 2;
-    // botHandIntroOld();
-    botHandIntro();
-    readyCount = 0;
-
-  } else if (input == 20) {
-    // playerWinsOverall(); // remove
-  } else if (input == 21) {
-    // botWinsOverall(); // remove
-  } else if (input == 22 || input == 23) {
-    switch(input) {
-      case 22:
-        // player wins
-        playerVictor(true, green, 20);
-        break;
-      case 23:
-        // bot wins
-        playerVictor(false, green, 20);
-        break;
-    }
-
-    reset();
-    delay(250);
-    Serial.write("victoryDone");
-  } else if (input >= 24 && input < 27) {
-    switch(input) {
-      case 24:
-        // player win rock
-        readPlayerRock(1, false);
-        break;
-      case 25:
-        // player tie rock
-        readPlayerRock(0, false);
-        break;
-      case 26:
-        // player lose rock
-        readPlayerRock(-1, false);
-        break;
-    }
-  } else if (input >= 27 && input < 30) {
-    switch(input) {
-      case 27:
-        // player win paper
-        readPlayerPaper(1, false);
-        break;
-      case 28:
-        // player tie paper
-        readPlayerPaper(0, false);
-        break;
-      case 29:
-        // player lose paper
-        readPlayerPaper(-1, false);
-        break;
-    }
-  } else if (input >= 30 && input < 33) {
-    switch(input) {
-      case 30:
-        // player win scissors
-        readPlayerScissors(1, false);
-        break;
-      case 31:
-        // player tie scissors
-        readPlayerScissors(0, false);
-        break;
-      case 32:
-        // player lose scissors
-        readPlayerScissors(-1, false);
-        break;
-    }
-  } else if (input >= 33 && input < 36) {
-    switch(input) {
-      case 33:
-        // bot win
-        lightBotRing(green, false);
-        break;
-      case 34:
-        // bot tie
-        lightBotRing(purple, false);
-        break;
-      case 35:
-        // bot lose
-        lightBotRing(red, false);
-        break;
-    }
-
-    delay(250);
-    Serial.write("botResultDone");
-  } else if (input == 36) {
-    hideDisplay();
-    delay(100);
-    Serial.write("displayCleared");
-  } else if (input == 37) {
-    reset();
-    delay(100);
-    Serial.write("resetDone");
   }
 }
