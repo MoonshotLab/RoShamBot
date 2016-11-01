@@ -592,17 +592,6 @@ void hideDisplay() {
   alpha4.writeDisplay();
 }
 
-void reset() {
-  currentMode = -1;
-  sleeping = true;
-  playerScore = 0;
-  botScore = 0;
-
-  hideDisplay();
-  playNeutral();
-  relaysOff();
-}
-
 void relaysOn() {
   digitalWrite(ledRelayPin, HIGH);
   digitalWrite(servoRelayPin, HIGH);
@@ -613,6 +602,17 @@ void relaysOff() {
   digitalWrite(servoRelayPin, LOW);
 }
 
+
+void reset() {
+  currentMode = -1;
+  sleeping = true;
+  playerScore = 0;
+  botScore = 0;
+
+  hideDisplay();
+  playNeutral();
+  relaysOff();
+}
 
 void setup() {
   // exit(0);
