@@ -38,11 +38,11 @@ int userPixelOffset = 2;
 int botPixelOffset = halfNeoLength + userPixelOffset; // accounts for two display lights in the center
 
 int upperOpen = 85;
-int upperClosed = 0;
+int upperClosed = 0; // 45?
 int upperRest = (upperOpen + upperClosed) / 2;
 
 int lowerOpen = 0;
-int lowerClosed = 85;
+int lowerClosed = 85; // 45?
 int lowerRest = (lowerOpen + lowerClosed) / 2;
 
 int throwDelay = 2000; // how many ms throw is shown
