@@ -87,7 +87,7 @@ class SampleListener(Leap.Listener):
         else:
             return False
 
-def waitFor(thing, picky = False, indefinitely = False):
+def waitFor(something, picky = False, indefinitely = False):
     """
     returns True if correct result was received within time limit
     else False
@@ -106,22 +106,22 @@ def waitFor(thing, picky = False, indefinitely = False):
         bytes_to_read = bot.inWaiting()
         data = bot.read(bytes_to_read)
 
-        if data == "reset":
-            return False
-
         if not picky or data == something:
             print('received data: ' + str(data))
             logging.info('received data: ' + str(data))
+            print('returning True')
             return True
 
         timeout_count += 1
         time.sleep(0.1)
 
 def waitForSomething(something, indefinitely = False):
-    waitFor(something, True, indefinitely)
+    res = waitFor(something, True, indefinitely)
+    return res
 
 def waitForAnything(indefinitely = False):
-    waitFor(_, False, indefinitely)
+    res = waitFor('_', False, indefinitely)
+    return res
 
 # ['p', 'r', 's'] => 'prs'
 def concat_row(lst):
@@ -312,6 +312,7 @@ def main():
                     print('going to sleep')
                     logging.info('going to sleep')
                     waitForSomething("reset", True) # indefinitely wait for reset
+                    sleeping = False
             except:
                 sleeping = False
 
@@ -342,6 +343,7 @@ def main():
                 sleep_timing = 0.1
 
                 if len(frame.hands) > 0:
+                    start_time = time.time() # awake while it's being used
                     if current_mode != 1:
                         current_mode = 1
 
@@ -355,7 +357,7 @@ def main():
                         time.sleep(sleep_timing)
 
             if sleeping:
-                break
+                continue
 
             bot_write('botHandTest')
 
@@ -383,6 +385,8 @@ def main():
 
                 print('postwait')
                 logging.info('postwait')
+                print(waitResult)
+                print(not waitResult)
 
                 if not waitResult:
                     print('timeout')
@@ -559,10 +563,10 @@ def main():
                         bot_write('botVictory')
 
                     # wait for start from arduino
-                    waitResult = waitForSomething("victoryDone")
-
-                    print('postwait')
-                    logging.info('postwait')
+                    # waitResult = waitForSomething("victoryDone")
+                    #
+                    # print('postwait')
+                    # logging.info('postwait')
 
                     break
 
@@ -579,7 +583,7 @@ def main():
         try:
             controller.remove_listener(listener)
         except:
-            pass
+            raise
 
         cPickle.dump(M, open(PICKLE_FILE, 'wb'))
 

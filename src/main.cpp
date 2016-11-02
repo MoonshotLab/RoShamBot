@@ -42,8 +42,8 @@ int upperClosed = 60; // 50?
 // int upperRest = (upperOpen + upperClosed) / 2; // 25
 int upperRest = 25;
 
-int lowerOpen = 160; // 160 // 55
-int lowerClosed = 120; // 120 // 5
+int lowerOpen = 55; // 160 // 55
+int lowerClosed = 5; // 120 // 5
 // int lowerRest = (lowerOpen + lowerClosed) / 2; // 31
 int lowerRest = 31;
 
@@ -603,15 +603,23 @@ void relaysOff() {
 }
 
 
-void reset() {
-  currentMode = -1;
-  sleeping = true;
+void reset(bool sleep) {
+  if (sleep) {
+    currentMode = -1;
+    sleeping = true;
+  } else {
+    currentMode = 0;
+  }
+
   playerScore = 0;
   botScore = 0;
 
   hideDisplay();
   playNeutral();
-  relaysOff();
+
+  if (sleep) {
+    relaysOff();
+  }
 }
 
 void setup() {
@@ -620,6 +628,7 @@ void setup() {
 
   pinMode(resetButtonPin, INPUT);
   pinMode(ledRelayPin, OUTPUT);
+  digitalWrite(ledRelayPin, HIGH);
   // pinMode(servoRelayPin, OUTPUT);
 
   alpha4.begin(0x70);  // pass in the address
@@ -637,10 +646,12 @@ void setup() {
 }
 
 void loop() {
-  while (false) {
+  while (sleeping) {
+    Serial.println(0);
     resetButtonState = digitalRead(resetButtonPin);
 
     if (resetButtonState == HIGH) {
+      Serial.println(1);
       sleeping = false;
       relaysOn();
       Serial.write("reset");
@@ -652,14 +663,17 @@ void loop() {
 
   if(Serial.available()==0) {
     resetButtonState = digitalRead(resetButtonPin);
+    // Serial.println(2);
 
     if (resetButtonState == HIGH) {
+      Serial.println(3);
       sleeping = false;
       Serial.write("reset");
       delay(100);
     }
 
     if (!sleeping && currentMode == 0) {
+      // Serial.println(4);
       rainbowCycleInc(rainbowInc++, 20);
 
       if (rainbowInc > 255) {
@@ -669,6 +683,7 @@ void loop() {
 
     delay(10);
   } else {
+    // Serial.println(5);
     int input = Serial.read();
 
     Serial.println(input);
@@ -743,9 +758,9 @@ void loop() {
           break;
       }
 
-      reset();
       delay(250);
       Serial.write("victoryDone");
+      reset(false); // reset but don't sleep
     } else if (input >= 24 && input < 27) {
       switch(input) {
         case 24:
@@ -814,7 +829,7 @@ void loop() {
       delay(100);
       Serial.write("displayCleared");
     } else if (input == 37) {
-      reset();
+      reset(true); // reset and sleep
       delay(100);
       Serial.write("resetDone");
     }
