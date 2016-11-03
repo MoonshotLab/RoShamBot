@@ -1,0 +1,18 @@
+#!/bin/bash
+
+SCRIPTPATH=/Users/moonshot/Code/roshambot;
+
+deactivate;
+
+cd $SCRIPTPATH;
+
+# maybe figure out a better way than doing this every time;
+# seems to be idempotent so I'm not worried about it
+# virtualenv venv;
+source venv/bin/activate;
+# pip install -r requirements.txt;
+
+ARDUINOPORT=$(platformio device list --json-output | python util/getport.py);
+
+platformio run -e uno;
+python util/runtest.py --port $ARDUINOPORT
