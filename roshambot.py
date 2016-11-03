@@ -34,7 +34,8 @@ MEMORY = 5
 ROUNDS_TO_WIN = 3
 TIME_BETWEEN_MOVES = 2
 TIMEOUT_LENGTH = 1000
-SLEEP_DELTA = 60 * 5 # wait 5 minutes before sleeping
+# SLEEP_DELTA = 60 * 5 # wait 5 minutes before sleeping
+SLEEP_DELTA = 15 # wait 5 minutes before sleeping
 
 ROOT = '0'
 CHOICES = ['r', 'p', 's']
