@@ -101,10 +101,10 @@ def waitFor(something, picky = False, indefinitely = False):
         timeout_count = 0
 
         while not bot.in_waiting:
-            if not indefinitely and timeout_count >= TIMEOUT_LENGTH:
-                return False
-
             if not indefinitely:
+                if timeout_count >= TIMEOUT_LENGTH:
+                    return False
+
                 timeout_count += 1
 
             time.sleep(0.25)
