@@ -114,15 +114,15 @@ def waitFor(something, picky = False, indefinitely = False):
         # data = bot.read(bytes_to_read)
         data = bot.readline()
         # data = bot.read(1) # we know it's a 1-byte int
-        # msg = decode_msg(data)
+        msg = decode_msg(data)
 
         if data:
             print('data: ' + str(data))
-            # print('msg: ' + str(msg))
+            print('msg: ' + str(msg))
             print('waiting for: ' + str(something))
 
-            if not picky or data == something:
-                logging.info('received data: ' + str(data))
+            if not picky or msg == something:
+                logging.info('received msg: ' + str(msg))
                 print('returning True')
                 return True
 

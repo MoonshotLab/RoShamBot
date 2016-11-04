@@ -67,25 +67,21 @@ const uint32_t purple = strip.Color(0, 128, 128);
 void playNeutral() {
   upperFingers.write(upperRest);
   lowerFingers.write(lowerRest);
-  Serial.println("neutral");
 }
 
 void playRock() {
   upperFingers.write(upperClosed);
   lowerFingers.write(lowerClosed);
-  Serial.println("playing rock");
 }
 
 void playPaper() {
   upperFingers.write(upperOpen);
   lowerFingers.write(lowerOpen);
-  Serial.println("playing paper");
 }
 
 void playScissors() {
   upperFingers.write(upperOpen);
   lowerFingers.write(lowerClosed);
-  Serial.println("playing scissors");
 }
 
 // previously I was writing strings via serial, but I want something of a set size
@@ -257,8 +253,8 @@ void readPlayerScissors(int res, bool wipe) {
 void readPlayerError(bool wipe) {
   lightPlayerRing(red, wipe);
   delay(500);
-  Serial.println("errorDone");
-  // Serial.println(encodeMsg("errorDone"));
+  // Serial.println("errorDone");
+  Serial.println(encodeMsg("errorDone"));
 }
 
 void countdownOne(bool user) {
@@ -276,8 +272,8 @@ void countdownOne(bool user) {
     delay(10);
   }
 
-  Serial.println("oneDone");
-  // Serial.println(encodeMsg("oneDone"));
+  // Serial.println("oneDone");
+  Serial.println(encodeMsg("oneDone"));
 }
 
 void countdownTwo(bool user) {
@@ -306,8 +302,8 @@ void countdownTwo(bool user) {
     delay(10);
   }
 
-  Serial.println("twoDone");
-  // Serial.println(encodeMsg("twoDone"));
+  // Serial.println("twoDone");
+  Serial.println(encodeMsg("twoDone"));
 }
 
 void countdownThree(bool user) {
@@ -336,8 +332,8 @@ void countdownThree(bool user) {
     delay(10);
   }
 
-  Serial.println("threeDone");
-  // Serial.println(encodeMsg("threeDone"));
+  // Serial.println("threeDone");
+  Serial.println(encodeMsg("threeDone"));
 }
 
 void countdownThrow(bool user) {
@@ -371,8 +367,8 @@ void countdownThrow(bool user) {
   delay(250);
   neoWipe();
 
-  Serial.println("throwDone");
-  // Serial.println(encodeMsg("throwDone"));
+  // Serial.println("throwDone");
+  Serial.println(encodeMsg("throwDone"));
 }
 
 
@@ -618,8 +614,8 @@ void loop() {
       sleeping = false;
       relaysOn();
       delay(100);
-      Serial.println("reset");
-      // Serial.println(encodeMsg("reset"));
+      // Serial.println("reset");
+      Serial.println(encodeMsg("reset"));
     }
 
     delay(250);
@@ -630,8 +626,8 @@ void loop() {
 
     if (resetButtonState == HIGH) {
       sleeping = false;
-      Serial.println("reset");
-      // Serial.println(encodeMsg("reset"));
+      // Serial.println("reset");
+      Serial.println(encodeMsg("reset"));
       delay(100);
     }
 
@@ -672,8 +668,8 @@ void loop() {
       currentMode = -1;
       neoWipe();
       delay(100);
-      Serial.println("wipeDone");
-      // Serial.println(encodeMsg("wipeDone"));
+      // Serial.println("wipeDone");
+      Serial.println(encodeMsg("wipeDone"));
     } else if (input == 16) {
       currentMode = 0; // rainbow cycle
       playerScore = 0;
@@ -719,8 +715,8 @@ void loop() {
       }
 
       delay(250);
-      Serial.println("victoryDone");
-      // Serial.println(encodeMsg("victoryDone"));
+      // Serial.println("victoryDone");
+      Serial.println(encodeMsg("victoryDone"));
       reset(false); // reset but don't sleep
     } else if (input >= 24 && input < 27) {
       switch(input) {
@@ -784,18 +780,18 @@ void loop() {
       }
 
       delay(250);
-      Serial.println("botResultDone");
-      // Serial.println(encodeMsg("botResultDone"));
+      // Serial.println("botResultDone");
+      Serial.println(encodeMsg("botResultDone"));
     } else if (input == 36) {
       hideDisplay();
       delay(100);
-      Serial.println("displayCleared");
-      // Serial.println(encodeMsg("displayCleared"));
+      // Serial.println("displayCleared");
+      Serial.println(encodeMsg("displayCleared"));
     } else if (input == 37) {
       reset(true); // reset and sleep
       delay(100);
-      Serial.println("resetDone");
-      // Serial.println(encodeMsg("resetDone"));
+      // Serial.println("resetDone");
+      Serial.println(encodeMsg("resetDone"));
     }
   }
 }
