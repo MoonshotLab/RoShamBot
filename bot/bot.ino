@@ -67,57 +67,65 @@ const uint32_t purple = strip.Color(0, 128, 128);
 void playNeutral() {
   upperFingers.write(upperRest);
   lowerFingers.write(lowerRest);
-  // Serial.println("neutral");
+  Serial.println("neutral");
+  // Serial.pencodeMsg(rintln("neutral"));
 }
 
 void playRock() {
   upperFingers.write(upperClosed);
   lowerFingers.write(lowerClosed);
-  // Serial.println("playing rock");
+  Serial.println("playing rock");
+  // Serial.pencodeMsg(rintln("playing rock"));
 }
 
 void playPaper() {
   upperFingers.write(upperOpen);
   lowerFingers.write(lowerOpen);
-  // Serial.println("playing paper");
+  Serial.println("playing paper");
+  // Serial.pencodeMsg(rintln("playing paper"));
 }
 
 void playScissors() {
   upperFingers.write(upperOpen);
   lowerFingers.write(lowerClosed);
-  // Serial.println("playing scissors");
+  Serial.println("playing scissors");
+  // Serial.pencodeMsg(rintln("playing scissors"));
 }
 
 // previously I was writing strings via serial, but I want something of a set size
-int encodeMsg(String str) {
+uint8_t encodeMsg(String str) {
   // I wish I could do a switch here, but the val has to be an int :/
+  uint8_t res;
+
   if (str == "reset") {
-    return 0;
+    res = 1;
   } else if (str == "resetDone") {
-    return 1;
+    res = 2;
   } else if (str == "displayCleared") {
-    return 2;
+    res = 3;
   } else if (str == "oneDone") {
-    return 3;
+    res = 4;
   } else if (str == "twoDone") {
-    return 4;
+    res = 5;
   } else if (str == "threeDone") {
-    return 5;
+    res = 6;
   } else if (str == "throwDone") {
-    return 6;
+    res = 7;
   } else if (str == "moveDone") {
-    return 7;
+    res = 8;
   } else if (str == "errorDone") {
-    return 8;
+    res = 9;
   } else if (str == "wipeDone") {
-    return 9;
+    res = 10;
   } else if (str == "victoryDone") {
-    return 10;
+    res = 11;
   } else if (str == "botResultDone") {
-    return 11;
+    res = 12;
   } else {
-    return -1;
+    res = 13;
   }
+
+  return res;
 }
 
 void playMove(int input) {
@@ -139,6 +147,8 @@ void playMove(int input) {
   }
   delay(100);
   Serial.write(encodeMsg("moveDone"));
+  Serial.println("moveDone");
+  Serial.println(encodeMsg("moveDone"));
 }
 
 void neoWipe() {
@@ -253,6 +263,8 @@ void readPlayerError(bool wipe) {
   lightPlayerRing(red, wipe);
   delay(500);
   Serial.write(encodeMsg("errorDone"));
+  Serial.println("errorDone");
+  Serial.println(encodeMsg("errorDone"));
 }
 
 void countdownOne(bool user) {
@@ -271,6 +283,8 @@ void countdownOne(bool user) {
   }
 
   Serial.write(encodeMsg("oneDone"));
+  Serial.println("oneDone");
+  Serial.println(encodeMsg("oneDone"));
 }
 
 void countdownTwo(bool user) {
@@ -300,6 +314,8 @@ void countdownTwo(bool user) {
   }
 
   Serial.write(encodeMsg("twoDone"));
+  Serial.println("twoDone");
+  Serial.println(encodeMsg("twoDone"));
 }
 
 void countdownThree(bool user) {
@@ -329,6 +345,8 @@ void countdownThree(bool user) {
   }
 
   Serial.write(encodeMsg("threeDone"));
+  Serial.println("threeDone");
+  Serial.println(encodeMsg("threeDone"));
 }
 
 void countdownThrow(bool user) {
@@ -363,6 +381,8 @@ void countdownThrow(bool user) {
   neoWipe();
 
   Serial.write(encodeMsg("throwDone"));
+  Serial.println("throwDone");
+  Serial.println(encodeMsg("throwDone"));
 }
 
 
@@ -603,14 +623,18 @@ void setup() {
 void loop() {
   while (sleeping) {
     // Serial.println(0);
+    // Serial.pencodeMsg(rintln(0));
     resetButtonState = digitalRead(RESET_BUTTON_PIN);
 
     if (resetButtonState == HIGH) {
       // Serial.println(1);
+      // Serial.pencodeMsg(rintln(1));
       sleeping = false;
       relaysOn();
       delay(100);
       Serial.write(encodeMsg("reset"));
+      Serial.println("reset");
+      Serial.println(encodeMsg("reset"));
     }
 
     delay(250);
@@ -619,16 +643,21 @@ void loop() {
   if(Serial.available()==0) {
     resetButtonState = digitalRead(RESET_BUTTON_PIN);
     // Serial.println(2);
+    // Serial.pencodeMsg(rintln(2));
 
     if (resetButtonState == HIGH) {
       // Serial.println(3);
+      // Serial.pencodeMsg(rintln(3));
       sleeping = false;
       Serial.write(encodeMsg("reset"));
+      Serial.println("reset");
+      Serial.println(encodeMsg("reset"));
       delay(100);
     }
 
     if (!sleeping && currentMode == 0) {
       // Serial.println(4);
+      // Serial.pencodeMsg(rintln(4));
       rainbowCycleInc(rainbowInc++, 20);
 
       if (rainbowInc > 255) {
@@ -639,9 +668,11 @@ void loop() {
     delay(100);
   } else {
     // Serial.println(5);
+    // Serial.pencodeMsg(rintln(5));
     int input = Serial.read();
 
     // Serial.println(input);
+    // Serial.pencodeMsg(rintln(input));
 
     if (input >= 0 && input < 4) {
       playMove(input);
@@ -667,8 +698,15 @@ void loop() {
       // clear display
       currentMode = -1;
       neoWipe();
-      delay(50);
-      Serial.write(encodeMsg("wipeDone"));
+      delay(100);
+      uint8_t msg = encodeMsg("wipeDone");
+      Serial.write(msg);
+      for (int i = 0; i < 50; i++) {
+        Serial.write(10);
+        delay(50);
+      }
+      Serial.println("wipeDone");
+      Serial.println(encodeMsg("wipeDone"));
     } else if (input == 16) {
       currentMode = 0; // rainbow cycle
       playerScore = 0;
@@ -715,6 +753,8 @@ void loop() {
 
       delay(250);
       Serial.write(encodeMsg("victoryDone"));
+      Serial.println("victoryDone");
+      Serial.println(encodeMsg("victoryDone"));
       reset(false); // reset but don't sleep
     } else if (input >= 24 && input < 27) {
       switch(input) {
@@ -779,14 +819,20 @@ void loop() {
 
       delay(250);
       Serial.write(encodeMsg("botResultDone"));
+      Serial.println("botResultDone");
+      Serial.println(encodeMsg("botResultDone"));
     } else if (input == 36) {
       hideDisplay();
       delay(100);
       Serial.write(encodeMsg("displayCleared"));
+      Serial.println("displayCleared");
+      Serial.println(encodeMsg("displayCleared"));
     } else if (input == 37) {
       reset(true); // reset and sleep
       delay(100);
       Serial.write(encodeMsg("resetDone"));
+      Serial.println("resetDone");
+      Serial.println(encodeMsg("resetDone"));
     }
   }
 }

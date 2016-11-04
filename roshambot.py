@@ -107,13 +107,15 @@ def waitFor(something, picky = False, indefinitely = False):
         if not indefinitely and timeout_count >= TIMEOUT_LENGTH:
             return False
 
-        bytes_to_read = bot.in_waiting
+        bytes_to_read = bot.inWaiting()
         data = bot.read(bytes_to_read)
+        # data = bot.read(1) # we know it's a 1-byte int
+        msg = decode_msg(data)
 
-        if data:
-            msg = decode_msg(data)
-            print('data: ' + str(msg))
-            print()
+        if data and msg:
+            print('data: ' + str(data))
+            print('msg: ' + str(msg))
+            print('waiting for: ' + str(something))
 
             if not picky or msg == something:
                 logging.info('received msg: ' + str(msg))
@@ -196,7 +198,7 @@ def get_concatted_history(history, depth):
         return concat_row(history[0:depth])
 
 def bot_write(msg):
-    print(msg, SERIAL_MAP[msg])
+    print('writing: ', msg, SERIAL_MAP[msg])
 
     try:
         bot.write(struct.pack('>B', SERIAL_MAP[msg]))
@@ -205,7 +207,7 @@ def bot_write(msg):
         raise
 
 def bot_write_raw(msg):
-    print(msg)
+    print('writing: ', msg)
 
     try:
         bot.write(struct.pack('>B', msg))
@@ -268,25 +270,30 @@ def get_fresh_model():
     }
 
 def decode_msg(msg):
-    msg_map = {
-        0: "reset",
-        1: "resetDone",
-        2: "displayCleared",
-        3: "oneDone",
-        4: "twoDone",
-        5: "threeDone",
-        6: "throwDone",
-        7: "moveDone",
-        8: "errorDone",
-        9: "wipeDone",
-        10: "victoryDone",
-        11: "botResultDone",
-    }
+    try:
+        msg = int(str(msg).strip())
 
-    if msg in msg_map:
-        return msg_map[msg]
-    else:
-        return "_"
+        msg_map = {
+            1: "reset",
+            2: "resetDone",
+            3: "displayCleared",
+            4: "oneDone",
+            5: "twoDone",
+            6: "threeDone",
+            7: "throwDone",
+            8: "moveDone",
+            9: "errorDone",
+            10: "wipeDone",
+            11: "victoryDone",
+            12: "botResultDone",
+        }
+
+        if msg in msg_map:
+            return msg_map[msg]
+        else:
+            return msg
+    except:
+        return False
 
 try:
     if str_to_bool(args.fresh):
