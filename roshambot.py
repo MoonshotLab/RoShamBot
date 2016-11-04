@@ -103,21 +103,20 @@ def waitFor(something, picky = False, indefinitely = False):
         timeout_count = 0
 
     while True:
-        # print('iter')
 
         if not indefinitely and timeout_count >= TIMEOUT_LENGTH:
             return False
 
         bytes_to_read = bot.in_waiting
         data = bot.read(bytes_to_read)
-        # data = bot.readline()
 
         if data:
-            print('data: ' + str(data))
+            msg = decode_msg(data)
+            print('data: ' + str(msg))
             print()
 
-            if not picky or data == something:
-                logging.info('received data: ' + str(data))
+            if not picky or msg == something:
+                logging.info('received msg: ' + str(msg))
                 print('returning True')
                 return True
 
@@ -267,6 +266,27 @@ def get_fresh_model():
         },
         'nn': []
     }
+
+def decode_msg(msg):
+    msg_map = {
+        0: "reset"
+        1: "resetDone"
+        2: "displayCleared"
+        3: "oneDone"
+        4: "twoDone"
+        5: "threeDone"
+        6: "throwDone"
+        7: "moveDone"
+        8: "errorDone"
+        9: "wipeDone"
+        10: "victoryDone"
+        11: "botResultDone"
+    }
+
+    if msg in msg_map:
+        return msg_map[msg]
+    else:
+        return "_"
 
 try:
     if str_to_bool(args.fresh):

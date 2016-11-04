@@ -105,7 +105,7 @@ void playMove(int input) {
        exit(0);
   }
   delay(100);
-  Serial.write("moveDone");
+  Serial.write(encodeMsg("moveDone"));
 }
 
 void neoWipe() {
@@ -219,7 +219,7 @@ void readPlayerScissors(int res, bool wipe) {
 void readPlayerError(bool wipe) {
   lightPlayerRing(red, wipe);
   delay(500);
-  Serial.write("errorDone");
+  Serial.write(encodeMsg("errorDone"));
 }
 
 void countdownOne(bool user) {
@@ -237,7 +237,7 @@ void countdownOne(bool user) {
     delay(10);
   }
 
-  Serial.write("oneDone");
+  Serial.write(encodeMsg("oneDone"));
 }
 
 void countdownTwo(bool user) {
@@ -266,7 +266,7 @@ void countdownTwo(bool user) {
     delay(10);
   }
 
-  Serial.write("twoDone");
+  Serial.write(encodeMsg("twoDone"));
 }
 
 void countdownThree(bool user) {
@@ -295,7 +295,7 @@ void countdownThree(bool user) {
     delay(10);
   }
 
-  Serial.write("threeDone");
+  Serial.write(encodeMsg("threeDone"));
 }
 
 void countdownThrow(bool user) {
@@ -329,7 +329,7 @@ void countdownThrow(bool user) {
   delay(250);
   neoWipe();
 
-  Serial.write("throwDone");
+  Serial.write(encodeMsg("throwDone"));
 }
 
 
@@ -474,81 +474,6 @@ void botHandIntro() {
   neoWipe();
 }
 
-void botHandIntroOld() {
-  neoWipe();
-
-  int flashRepeat = 3;
-  uint32_t flashColors[3] = {red, green, blue};
-  for (int j = 0; j < flashRepeat; j++) {
-    for (int i = 0; i < halfNeoLength; i++) {
-      int posUser = i + userPixelOffset;
-      strip.setPixelColor(posUser, flashColors[j]);
-      int posBot = i + botPixelOffset;
-      strip.setPixelColor(posBot, flashColors[j]);
-    }
-    strip.show();
-    delay(100);
-  }
-
-  neoWipe();
-
-  int timingDelay = 500;
-  delay(timingDelay * 3); // dramatic pause
-
-  countdownOne(false);
-  delay(timingDelay);
-  countdownTwo(false);
-  delay(timingDelay);
-  countdownThree(false);
-  delay(timingDelay);
-  countdownThrow(false);
-
-  playRock();
-  delay(timingDelay);
-  playScissors();
-  delay(timingDelay);
-  playPaper();
-  delay(timingDelay);
-
-  playNeutral();
-
-  delay(timingDelay * 2);
-
-  wipeDisplay();
-
-  int numFlashes = 2;
-
-  // flash user
-  for (int i = 0; i < numFlashes; i++) {
-    displayChars('0', ' ', ' ', ' ');
-    lightPlayerRing(white, true);
-    delay(timingDelay);
-
-    neoWipe();
-    delay(timingDelay);
-  }
-
-  // flash bot
-  for (int i = 0; i < numFlashes; i++) {
-    displayChars(' ', ' ', ' ', '0');
-    lightBotRing(white, true);
-    delay(timingDelay);
-
-    neoWipe();
-    delay(timingDelay);
-  }
-
-  displayChars('P', 'L', 'A', 'Y');
-  delay(timingDelay);
-  wipeDisplay();
-
-  neoWipe();
-  displayScore(0, 0);
-  delay(timingDelay);
-
-  Serial.write("introDone");
-}
-
 void playerVictor(bool playerWon, uint32_t c, uint8_t wait) {
   neoWipe();
 
@@ -619,6 +544,25 @@ void reset(bool sleep) {
   }
 }
 
+// previously I was writing strings via serial, but I want something of a set size
+int encodeMsg(String str) {
+  switch(str) {
+    case "reset": return 0;
+    case "resetDone": return 1;
+    case "displayCleared": return 2;
+    case "oneDone": return 3;
+    case "twoDone": return 4;
+    case "threeDone": return 5;
+    case "throwDone": return 6;
+    case "moveDone": return 7;
+    case "errorDone": return 8;
+    case "wipeDone": return 9;
+    case "victoryDone": return 10;
+    case "botResultDone": return 11;
+    default: return -1;
+  }
+}
+
 void setup() {
   // exit(0);
   Serial.begin(9600);
@@ -652,7 +596,7 @@ void loop() {
       sleeping = false;
       relaysOn();
       delay(100);
-      Serial.write("reset");
+      Serial.write(encodeMsg("reset"));
     }
 
     delay(250);
@@ -665,7 +609,7 @@ void loop() {
     if (resetButtonState == HIGH) {
       // Serial.println(3);
       sleeping = false;
-      Serial.write("reset");
+      Serial.write(encodeMsg("reset"));
       delay(100);
     }
 
@@ -710,7 +654,7 @@ void loop() {
       currentMode = -1;
       neoWipe();
       delay(50);
-      Serial.write("wipeDone");
+      Serial.write(encodeMsg("wipeDone"));
     } else if (input == 16) {
       currentMode = 0; // rainbow cycle
       playerScore = 0;
@@ -756,7 +700,7 @@ void loop() {
       }
 
       delay(250);
-      Serial.write("victoryDone");
+      Serial.write(encodeMsg("victoryDone"));
       reset(false); // reset but don't sleep
     } else if (input >= 24 && input < 27) {
       switch(input) {
@@ -820,15 +764,15 @@ void loop() {
       }
 
       delay(250);
-      Serial.write("botResultDone");
+      Serial.write(encodeMsg("botResultDone"));
     } else if (input == 36) {
       hideDisplay();
       delay(100);
-      Serial.write("displayCleared");
+      Serial.write(encodeMsg("displayCleared"));
     } else if (input == 37) {
       reset(true); // reset and sleep
       delay(100);
-      Serial.write("resetDone");
+      Serial.write(encodeMsg("resetDone"));
     }
   }
 }
