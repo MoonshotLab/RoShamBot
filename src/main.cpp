@@ -9,11 +9,11 @@
   #include <avr/power.h>
 #endif
 
-#define LED_RELAY_PIN = 3
-#define UPPER_FINGERS_PIN = 9
-#define LOWER_FINGERS_PIN = 10
+#define LED_RELAY_PIN 3
+#define UPPER_FINGERS_PIN 9
+#define LOWER_FINGERS_PIN 10
 #define NEOPIN 11
-#define RESET_BUTTON_PIN = 12
+#define RESET_BUTTON_PIN 12
 
 int rainbowInc = 0;
 
