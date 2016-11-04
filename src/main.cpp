@@ -21,8 +21,8 @@ bool sleeping = false;
 int readyCount = 0; // fill ring to start game
 
 int pos = 0;    // variable to store the servo position
-int upperFingersPin = 8;
-int lowerFingersPin = 7;
+int upperFingersPin = 7;
+int lowerFingersPin = 10;
 
 int resetButtonPin = 12;
 int resetButtonState = 0;
@@ -30,7 +30,7 @@ int resetButtonState = 0;
 int ledRelayPin = 3;
 // int servoRelayPin = 3;
 
-#define NEOPIN 6
+#define NEOPIN 11
 int fullNeoLength = 50;
 int neoLength = 42;
 int halfNeoLength = neoLength / 2;
@@ -38,11 +38,11 @@ int userPixelOffset = 2;
 int botPixelOffset = halfNeoLength + userPixelOffset; // accounts for two display lights in the center
 
 int upperOpen = 175;
-int upperClosed = 73;
+int upperClosed = 61;
 int upperRest = 121;
 
-int lowerOpen = 0;
-int lowerClosed = 90;
+int lowerOpen = 5;
+int lowerClosed = 121;
 int lowerRest = 60;
 
 int throwDelay = 2000; // how many ms throw is shown
@@ -651,9 +651,9 @@ void loop() {
     if (resetButtonState == HIGH) {
       Serial.println(1);
       sleeping = false;
-      relaysOn();
       Serial.write("reset");
       delay(100);
+      relaysOn();
     }
 
     delay(250);
@@ -679,7 +679,7 @@ void loop() {
       }
     }
 
-    delay(10);
+    delay(100);
   } else {
     // Serial.println(5);
     int input = Serial.read();
