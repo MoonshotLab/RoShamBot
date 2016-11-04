@@ -269,18 +269,18 @@ def get_fresh_model():
 
 def decode_msg(msg):
     msg_map = {
-        0: "reset"
-        1: "resetDone"
-        2: "displayCleared"
-        3: "oneDone"
-        4: "twoDone"
-        5: "threeDone"
-        6: "throwDone"
-        7: "moveDone"
-        8: "errorDone"
-        9: "wipeDone"
-        10: "victoryDone"
-        11: "botResultDone"
+        0: "reset",
+        1: "resetDone",
+        2: "displayCleared",
+        3: "oneDone",
+        4: "twoDone",
+        5: "threeDone",
+        6: "throwDone",
+        7: "moveDone",
+        8: "errorDone",
+        9: "wipeDone",
+        10: "victoryDone",
+        11: "botResultDone",
     }
 
     if msg in msg_map:
