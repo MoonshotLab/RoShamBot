@@ -34,10 +34,8 @@ MEMORY = 5
 ROUNDS_TO_WIN = 3
 TIME_BETWEEN_MOVES = 2
 TIMEOUT_LENGTH = 1000
-# SLEEP_DELTA = 60 * 5 # wait 5 minutes before sleeping
-SLEEP_DELTA = 15 # wait 5 minutes before sleeping
+SLEEP_DELTA = 60 * 2 # wait 2 minutes before sleeping
 
-ROOT = '0'
 CHOICES = ['r', 'p', 's']
 BEATS = {'r': 'p', 'p': 's', 's': 'r'}
 FULL_PLAY = {'r': 'rock', 'p': 'paper', 's': 'scissors'}
@@ -116,15 +114,15 @@ def waitFor(something, picky = False, indefinitely = False):
         # data = bot.read(bytes_to_read)
         data = bot.readline()
         # data = bot.read(1) # we know it's a 1-byte int
-        msg = decode_msg(data)
+        # msg = decode_msg(data)
 
         if data:
             print('data: ' + str(data))
-            print('msg: ' + str(msg))
+            # print('msg: ' + str(msg))
             print('waiting for: ' + str(something))
 
-            if not picky or msg == something:
-                logging.info('received msg: ' + str(msg))
+            if not picky or data == something:
+                logging.info('received data: ' + str(data))
                 print('returning True')
                 return True
 
@@ -602,12 +600,6 @@ def main():
                     if game['win'] >= ROUNDS_TO_WIN:
                         bot_write('botVictory')
 
-                    # wait for start from arduino
-                    # waitResult = waitForSomething("victoryDone")
-                    #
-                    # print('postwait')
-                    # logging.info('postwait')
-
                     break
 
                 game['history'].appendleft(player_move)
@@ -616,7 +608,6 @@ def main():
                     game['history'].pop()
 
                 game['turn'] += 1
-            # break
     except:
         raise
     finally:
