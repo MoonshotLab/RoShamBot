@@ -88,6 +88,38 @@ void playScissors() {
   // Serial.println("playing scissors");
 }
 
+// previously I was writing strings via serial, but I want something of a set size
+int encodeMsg(String str) {
+  // I wish I could do a switch here, but the val has to be an int :/
+  if (str == "reset") {
+    return 0;
+  } else if (str == "resetDone") {
+    return 1;
+  } else if (str == "displayCleared") {
+    return 2;
+  } else if (str == "oneDone") {
+    return 3;
+  } else if (str == "twoDone") {
+    return 4;
+  } else if (str == "threeDone") {
+    return 5;
+  } else if (str == "throwDone") {
+    return 6;
+  } else if (str == "moveDone") {
+    return 7;
+  } else if (str == "errorDone") {
+    return 8;
+  } else if (str == "wipeDone") {
+    return 9;
+  } else if (str == "victoryDone") {
+    return 10;
+  } else if (str == "botResultDone") {
+    return 11;
+  } else {
+    return -1;
+  }
+}
+
 void playMove(int input) {
   switch(input) {
     case 0:
@@ -542,38 +574,6 @@ void reset(bool sleep) {
 
   if (sleep) {
     relaysOff();
-  }
-}
-
-// previously I was writing strings via serial, but I want something of a set size
-int encodeMsg(String str) {
-  // I wish I could do a switch here, but the val has to be an int :/
-  if (str == "reset") {
-    return 0;
-  } else if (str == "resetDone") {
-    return 1;
-  } else if (str == "displayCleared") {
-    return 2;
-  } else if (str == "oneDone") {
-    return 3;
-  } else if (str == "twoDone") {
-    return 4;
-  } else if (str == "threeDone") {
-    return 5;
-  } else if (str == "throwDone") {
-    return 6;
-  } else if (str == "moveDone") {
-    return 7;
-  } else if (str == "errorDone") {
-    return 8;
-  } else if (str == "wipeDone") {
-    return 9;
-  } else if (str == "victoryDone") {
-    return 10;
-  } else if (str == "botResultDone") {
-    return 11;
-  } else {
-    return -1;
   }
 }
 
