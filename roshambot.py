@@ -99,20 +99,26 @@ def waitFor(something, picky = False, indefinitely = False):
     print('waiting for ' + something)
     logging.info('waiting for ' + something)
 
-    if not indefinitely:
+    while True:
         timeout_count = 0
 
-    while True:
+        while not bot.in_waiting:
+            if not indefinitely and timeout_count >= TIMEOUT_LENGTH:
+                return False
 
-        if not indefinitely and timeout_count >= TIMEOUT_LENGTH:
-            return False
+            if not indefinitely:
+                timeout_count += 1
 
-        bytes_to_read = bot.inWaiting()
-        data = bot.read(bytes_to_read)
+            time.sleep(0.25)
+
+        print('in_waiting')
+        # bytes_to_read = bot.inWaiting()
+        # data = bot.read(bytes_to_read)
+        data = bot.readline()
         # data = bot.read(1) # we know it's a 1-byte int
         msg = decode_msg(data)
 
-        if data and msg:
+        if data:
             print('data: ' + str(data))
             print('msg: ' + str(msg))
             print('waiting for: ' + str(something))
@@ -121,11 +127,6 @@ def waitFor(something, picky = False, indefinitely = False):
                 logging.info('received msg: ' + str(msg))
                 print('returning True')
                 return True
-
-        if not indefinitely:
-            timeout_count += 1
-
-        time.sleep(0.1)
 
 def waitForSomething(something, indefinitely = False):
     res = waitFor(something, True, indefinitely)
@@ -313,7 +314,7 @@ except:
 
 
 try:
-    bot = serial.Serial(args.port, 9600, timeout=1)
+    bot = serial.Serial(args.port, 14400, timeout=1)
 except:
     print('Could not connect to Arduino.')
     logging.info('Could not connect to Arduino.')
@@ -518,7 +519,8 @@ def main():
                         logging.info('timeout')
                         break # restart
 
-                    if invalid_play_count >= 5:
+                    if invalid_play_count >= 3:
+                        bot_write("clearDisplay")
                         break
 
                     continue

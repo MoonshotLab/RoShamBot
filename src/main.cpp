@@ -146,8 +146,8 @@ void playMove(int input) {
        exit(0);
   }
   delay(100);
-  Serial.write(encodeMsg("moveDone"));
-  Serial.println("moveDone");
+  // Serial.write(encodeMsg("moveDone"));
+  // Serial.println("moveDone");
   Serial.println(encodeMsg("moveDone"));
 }
 
@@ -262,8 +262,8 @@ void readPlayerScissors(int res, bool wipe) {
 void readPlayerError(bool wipe) {
   lightPlayerRing(red, wipe);
   delay(500);
-  Serial.write(encodeMsg("errorDone"));
-  Serial.println("errorDone");
+  // Serial.write(encodeMsg("errorDone"));
+  // Serial.println("errorDone");
   Serial.println(encodeMsg("errorDone"));
 }
 
@@ -282,8 +282,8 @@ void countdownOne(bool user) {
     delay(10);
   }
 
-  Serial.write(encodeMsg("oneDone"));
-  Serial.println("oneDone");
+  // Serial.write(encodeMsg("oneDone"));
+  // Serial.println("oneDone");
   Serial.println(encodeMsg("oneDone"));
 }
 
@@ -313,8 +313,8 @@ void countdownTwo(bool user) {
     delay(10);
   }
 
-  Serial.write(encodeMsg("twoDone"));
-  Serial.println("twoDone");
+  // Serial.write(encodeMsg("twoDone"));
+  // Serial.println("twoDone");
   Serial.println(encodeMsg("twoDone"));
 }
 
@@ -344,8 +344,8 @@ void countdownThree(bool user) {
     delay(10);
   }
 
-  Serial.write(encodeMsg("threeDone"));
-  Serial.println("threeDone");
+  // Serial.write(encodeMsg("threeDone"));
+  // Serial.println("threeDone");
   Serial.println(encodeMsg("threeDone"));
 }
 
@@ -380,8 +380,8 @@ void countdownThrow(bool user) {
   delay(250);
   neoWipe();
 
-  Serial.write(encodeMsg("throwDone"));
-  Serial.println("throwDone");
+  // Serial.write(encodeMsg("throwDone"));
+  // Serial.println("throwDone");
   Serial.println(encodeMsg("throwDone"));
 }
 
@@ -599,7 +599,7 @@ void reset(bool sleep) {
 
 void setup() {
   // exit(0);
-  Serial.begin(9600);
+  Serial.begin(14400);
 
   pinMode(RESET_BUTTON_PIN, INPUT);
   pinMode(LED_RELAY_PIN, OUTPUT);
@@ -632,8 +632,8 @@ void loop() {
       sleeping = false;
       relaysOn();
       delay(100);
-      Serial.write(encodeMsg("reset"));
-      Serial.println("reset");
+      // Serial.write(encodeMsg("reset"));
+      // Serial.println("reset");
       Serial.println(encodeMsg("reset"));
     }
 
@@ -649,8 +649,8 @@ void loop() {
       // Serial.println(3);
       // Serial.pencodeMsg(rintln(3));
       sleeping = false;
-      Serial.write(encodeMsg("reset"));
-      Serial.println("reset");
+      // Serial.write(encodeMsg("reset"));
+      // Serial.println("reset");
       Serial.println(encodeMsg("reset"));
       delay(100);
     }
@@ -699,14 +699,16 @@ void loop() {
       currentMode = -1;
       neoWipe();
       delay(100);
-      uint8_t msg = encodeMsg("wipeDone");
-      Serial.write(msg);
-      for (int i = 0; i < 50; i++) {
-        Serial.write(10);
-        delay(50);
-      }
-      Serial.println("wipeDone");
+      // Serial.write(10);
       Serial.println(encodeMsg("wipeDone"));
+      // uint8_t msg = encodeMsg("wipeDone");
+      // Serial.write(msg);
+      // for (int i = 0; i < 50; i++) {
+      //   // Serial.write(10);
+      //   delay(50);
+      // }
+      // Serial.println("wipeDone");
+      // Serial.println(encodeMsg("wipeDone"));
     } else if (input == 16) {
       currentMode = 0; // rainbow cycle
       playerScore = 0;
@@ -752,8 +754,8 @@ void loop() {
       }
 
       delay(250);
-      Serial.write(encodeMsg("victoryDone"));
-      Serial.println("victoryDone");
+      // Serial.write(encodeMsg("victoryDone"));
+      // Serial.println("victoryDone");
       Serial.println(encodeMsg("victoryDone"));
       reset(false); // reset but don't sleep
     } else if (input >= 24 && input < 27) {
@@ -818,20 +820,20 @@ void loop() {
       }
 
       delay(250);
-      Serial.write(encodeMsg("botResultDone"));
-      Serial.println("botResultDone");
+      // Serial.write(encodeMsg("botResultDone"));
+      // Serial.println("botResultDone");
       Serial.println(encodeMsg("botResultDone"));
     } else if (input == 36) {
       hideDisplay();
       delay(100);
-      Serial.write(encodeMsg("displayCleared"));
-      Serial.println("displayCleared");
+      // Serial.write(encodeMsg("displayCleared"));
+      // Serial.println("displayCleared");
       Serial.println(encodeMsg("displayCleared"));
     } else if (input == 37) {
       reset(true); // reset and sleep
       delay(100);
-      Serial.write(encodeMsg("resetDone"));
-      Serial.println("resetDone");
+      // Serial.write(encodeMsg("resetDone"));
+      // Serial.println("resetDone");
       Serial.println(encodeMsg("resetDone"));
     }
   }
