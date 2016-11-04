@@ -651,9 +651,9 @@ void loop() {
     if (resetButtonState == HIGH) {
       Serial.println(1);
       sleeping = false;
-      Serial.write("reset");
-      delay(100);
       relaysOn();
+      delay(100);
+      Serial.write("reset");
     }
 
     delay(250);

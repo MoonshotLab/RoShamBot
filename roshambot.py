@@ -98,14 +98,20 @@ def waitFor(something, picky = False, indefinitely = False):
 
     print('waiting for ' + something)
     logging.info('waiting for ' + something)
-    timeout_count = 0
+
+    if not indefinitely:
+        timeout_count = 0
 
     while True:
+        print('iter')
+
         if not indefinitely and timeout_count >= TIMEOUT_LENGTH:
             return False
 
         bytes_to_read = bot.inWaiting()
         data = bot.read(bytes_to_read)
+
+        print(data)
 
         if not picky or data == something:
             print('received data: ' + str(data))
@@ -113,7 +119,9 @@ def waitFor(something, picky = False, indefinitely = False):
             print('returning True')
             return True
 
-        timeout_count += 1
+        if not indefinitely:
+            timeout_count += 1
+
         time.sleep(0.1)
 
 def waitForSomething(something, indefinitely = False):
