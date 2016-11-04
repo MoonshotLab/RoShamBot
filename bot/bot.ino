@@ -66,25 +66,25 @@ const uint32_t purple = strip.Color(0, 128, 128);
 void playNeutral() {
   upperFingers.write(upperRest);
   lowerFingers.write(lowerRest);
-  Serial.println("neutral");
+  // Serial.println("neutral");
 }
 
 void playRock() {
   upperFingers.write(upperClosed);
   lowerFingers.write(lowerClosed);
-  Serial.println("playing rock");
+  // Serial.println("playing rock");
 }
 
 void playPaper() {
   upperFingers.write(upperOpen);
   lowerFingers.write(lowerOpen);
-  Serial.println("playing paper");
+  // Serial.println("playing paper");
 }
 
 void playScissors() {
   upperFingers.write(upperOpen);
   lowerFingers.write(lowerClosed);
-  Serial.println("playing scissors");
+  // Serial.println("playing scissors");
 }
 
 void playMove(int input) {
@@ -644,11 +644,11 @@ void setup() {
 
 void loop() {
   while (sleeping) {
-    Serial.println(0);
+    // Serial.println(0);
     resetButtonState = digitalRead(RESET_BUTTON_PIN);
 
     if (resetButtonState == HIGH) {
-      Serial.println(1);
+      // Serial.println(1);
       sleeping = false;
       relaysOn();
       delay(100);
@@ -663,7 +663,7 @@ void loop() {
     // Serial.println(2);
 
     if (resetButtonState == HIGH) {
-      Serial.println(3);
+      // Serial.println(3);
       sleeping = false;
       Serial.write("reset");
       delay(100);
@@ -683,7 +683,7 @@ void loop() {
     // Serial.println(5);
     int input = Serial.read();
 
-    Serial.println(input);
+    // Serial.println(input);
 
     if (input >= 0 && input < 4) {
       playMove(input);
@@ -709,7 +709,7 @@ void loop() {
       // clear display
       currentMode = -1;
       neoWipe();
-      delay(250);
+      delay(50);
       Serial.write("wipeDone");
     } else if (input == 16) {
       currentMode = 0; // rainbow cycle
