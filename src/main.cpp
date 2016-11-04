@@ -1,5 +1,6 @@
 #include <Adafruit_TiCoServo.h>
 
+#include <String.h>
 #include <Wire.h>
 #include "Adafruit_LEDBackpack.h"
 #include "Adafruit_GFX.h"
