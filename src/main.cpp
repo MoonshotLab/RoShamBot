@@ -547,20 +547,33 @@ void reset(bool sleep) {
 
 // previously I was writing strings via serial, but I want something of a set size
 int encodeMsg(String str) {
-  switch(str) {
-    case "reset": return 0;
-    case "resetDone": return 1;
-    case "displayCleared": return 2;
-    case "oneDone": return 3;
-    case "twoDone": return 4;
-    case "threeDone": return 5;
-    case "throwDone": return 6;
-    case "moveDone": return 7;
-    case "errorDone": return 8;
-    case "wipeDone": return 9;
-    case "victoryDone": return 10;
-    case "botResultDone": return 11;
-    default: return -1;
+  // I wish I could do a switch here, but the val has to be an int :/
+  if (str == "reset") {
+    return 0;
+  } else if (str == "resetDone") {
+    return 1;
+  } else if (str == "displayCleared") {
+    return 2;
+  } else if (str == "oneDone") {
+    return 3;
+  } else if (str == "twoDone") {
+    return 4;
+  } else if (str == "threeDone") {
+    return 5;
+  } else if (str == "throwDone") {
+    return 6;
+  } else if (str == "moveDone") {
+    return 7;
+  } else if (str == "errorDone") {
+    return 8;
+  } else if (str == "wipeDone") {
+    return 9;
+  } else if (str == "victoryDone") {
+    return 10;
+  } else if (str == "botResultDone") {
+    return 11;
+  } else {
+    return -1;
   }
 }
 
