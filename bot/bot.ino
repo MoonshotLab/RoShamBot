@@ -1,4 +1,4 @@
-#include <Servo.h>
+#include <Adafruit_TiCoServo.h>
 
 #include <Wire.h>
 #include "Adafruit_LEDBackpack.h"
@@ -8,6 +8,12 @@
 #ifdef __AVR__
   #include <avr/power.h>
 #endif
+
+#define LED_RELAY_PIN = 3
+#define UPPER_FINGERS_PIN = 9
+#define LOWER_FINGERS_PIN = 10
+#define NEOPIN 11
+#define RESET_BUTTON_PIN = 12
 
 int rainbowInc = 0;
 
@@ -21,34 +27,27 @@ bool sleeping = false;
 int readyCount = 0; // fill ring to start game
 
 int pos = 0;    // variable to store the servo position
-int upperFingersPin = 7;
-int lowerFingersPin = 10;
 
-int resetButtonPin = 12;
 int resetButtonState = 0;
 
-int ledRelayPin = 3;
-// int servoRelayPin = 3;
+const int fullNeoLength = 50;
+const int neoLength = 42;
+const int halfNeoLength = neoLength / 2;
+const int userPixelOffset = 2;
+const int botPixelOffset = halfNeoLength + userPixelOffset; // accounts for two display lights in the center
 
-#define NEOPIN 11
-int fullNeoLength = 50;
-int neoLength = 42;
-int halfNeoLength = neoLength / 2;
-int userPixelOffset = 2;
-int botPixelOffset = halfNeoLength + userPixelOffset; // accounts for two display lights in the center
+const int upperOpen = 175;
+const int upperClosed = 61;
+const int upperRest = 121;
 
-int upperOpen = 175;
-int upperClosed = 61;
-int upperRest = 121;
+const int lowerOpen = 5;
+const int lowerClosed = 121;
+const int lowerRest = 60;
 
-int lowerOpen = 5;
-int lowerClosed = 121;
-int lowerRest = 60;
-
-int throwDelay = 2000; // how many ms throw is shown
+const int throwDelay = 2000; // how many ms throw is shown
 
 // hand servos
-Servo upperFingers, lowerFingers;
+Adafruit_TiCoServo upperFingers, lowerFingers;
 
 // score display
 Adafruit_AlphaNum4 alpha4 = Adafruit_AlphaNum4();
@@ -57,12 +56,12 @@ Adafruit_AlphaNum4 alpha4 = Adafruit_AlphaNum4();
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(fullNeoLength, NEOPIN, NEO_GRB + NEO_KHZ800); // GRB, not RGB!
 
 // wtf grb
-uint32_t red = strip.Color(0, 255, 0);
-uint32_t green = strip.Color(255, 0, 0);
-uint32_t blue = strip.Color(0, 0, 255);
-uint32_t orange = strip.Color(165, 255, 0);
-uint32_t white = strip.Color(255, 255, 255);
-uint32_t purple = strip.Color(0, 128, 128);
+const uint32_t red = strip.Color(0, 255, 0);
+const uint32_t green = strip.Color(255, 0, 0);
+const uint32_t blue = strip.Color(0, 0, 255);
+const uint32_t orange = strip.Color(165, 255, 0);
+const uint32_t white = strip.Color(255, 255, 255);
+const uint32_t purple = strip.Color(0, 128, 128);
 
 void playNeutral() {
   upperFingers.write(upperRest);
@@ -591,12 +590,12 @@ void hideDisplay() {
 }
 
 void relaysOn() {
-  digitalWrite(ledRelayPin, HIGH);
+  digitalWrite(LED_RELAY_PIN, HIGH);
   // digitalWrite(servoRelayPin, HIGH);
 }
 
 void relaysOff() {
-  digitalWrite(ledRelayPin, LOW);
+  digitalWrite(LED_RELAY_PIN, LOW);
   // digitalWrite(servoRelayPin, LOW);
 }
 
@@ -624,9 +623,9 @@ void setup() {
   // exit(0);
   Serial.begin(9600);
 
-  pinMode(resetButtonPin, INPUT);
-  pinMode(ledRelayPin, OUTPUT);
-  digitalWrite(ledRelayPin, HIGH);
+  pinMode(RESET_BUTTON_PIN, INPUT);
+  pinMode(LED_RELAY_PIN, OUTPUT);
+  digitalWrite(LED_RELAY_PIN, HIGH);
   // pinMode(servoRelayPin, OUTPUT);
 
   alpha4.begin(0x70);  // pass in the address
@@ -636,8 +635,8 @@ void setup() {
   strip.begin();
   strip.show(); // Initialize all pixels to 'off'
 
-  upperFingers.attach(upperFingersPin);
-  lowerFingers.attach(lowerFingersPin);
+  upperFingers.attach(UPPER_FINGERS_PIN);
+  lowerFingers.attach(LOWER_FINGERS_PIN);
 
   upperFingers.write(upperRest);
   lowerFingers.write(lowerRest);
@@ -646,7 +645,7 @@ void setup() {
 void loop() {
   while (sleeping) {
     Serial.println(0);
-    resetButtonState = digitalRead(resetButtonPin);
+    resetButtonState = digitalRead(RESET_BUTTON_PIN);
 
     if (resetButtonState == HIGH) {
       Serial.println(1);
@@ -660,7 +659,7 @@ void loop() {
   }
 
   if(Serial.available()==0) {
-    resetButtonState = digitalRead(resetButtonPin);
+    resetButtonState = digitalRead(RESET_BUTTON_PIN);
     // Serial.println(2);
 
     if (resetButtonState == HIGH) {
