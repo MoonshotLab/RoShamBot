@@ -50,7 +50,7 @@ def bot_write_raw(msg):
 
 
 try:
-    bot = serial.Serial(args.port, 9600, timeout=1)
+    bot = serial.Serial(args.port, 14400, timeout=1)
 except:
     print('Could not connect to Arduino.')
     logging.info('Could not connect to Arduino.')
