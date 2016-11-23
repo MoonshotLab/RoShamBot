@@ -1,6 +1,8 @@
 ## RoShamBot
 
-![Alt text](/assets/roshambot.jpg?raw=true "Roshambot")
+Artificially intelligent rock paper scissors player. Read more [here](https://medium.com/moonshotlab/man-vs-machine-learning-40a39f7f936#.fnjjtdat2).
+
+![Alt text](/assets/roshambot-2.jpeg?raw=true "Roshambot")
 
 ### Requirements
 * Python (2.7)
