@@ -615,7 +615,10 @@ void loop() {
       relaysOn();
       delay(100);
       // Serial.println("reset");
-      Serial.println(encodeMsg("reset"));
+      for (int i = 0; i < 20; i++) {
+        Serial.println(encodeMsg("reset"));
+        delay(10);
+      }
     }
 
     delay(250);
@@ -627,8 +630,11 @@ void loop() {
     if (resetButtonState == HIGH) {
       sleeping = false;
       // Serial.println("reset");
-      Serial.println(encodeMsg("reset"));
       delay(100);
+      for (int i = 0; i < 20; i++) {
+        Serial.println(encodeMsg("reset"));
+        delay(10);
+      }
     }
 
     if (!sleeping && currentMode == 0) {
