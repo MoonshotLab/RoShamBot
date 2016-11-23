@@ -639,9 +639,10 @@ void loop() {
       }
     }
 
-    delay(100);
+    delay(50);
   } else {
-    int input = Serial.read();
+    uint8_t input = Serial.read();
+    Serial.println(input);
 
     if (input >= 0 && input < 4) {
       playMove(input);

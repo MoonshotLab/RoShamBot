@@ -34,7 +34,7 @@ MEMORY = 5
 ROUNDS_TO_WIN = 3
 TIME_BETWEEN_MOVES = 2
 TIMEOUT_LENGTH = 1000
-SLEEP_DELTA = 60 * 2 # wait 2 minutes before sleeping
+SLEEP_DELTA = 60 * 10 # wait 10 minutes before sleeping
 
 CHOICES = ['r', 'p', 's']
 BEATS = {'r': 'p', 'p': 's', 's': 'r'}
