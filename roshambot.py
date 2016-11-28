@@ -23,10 +23,16 @@ lib_dir = os.path.abspath(os.path.join(src_dir, args.leappath))
 sys.path.insert(0, lib_dir)
 import Leap
 
+from dotenv import load_dotenv
+dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
+load_dotenv(dotenv_path)
+
 from numpy.random import choice as npchoice
 from collections import deque
 import serial
 import struct
+
+import requests
 
 def str_to_bool(val): return val == 'True'
 
@@ -59,6 +65,11 @@ SERIAL_MAP = {
 }
 
 COUNTDOWN_MAP = {0: 'countOne', 1: 'countTwo', 2: 'countThree', 'throw': 'countThrow'}
+
+# for the display scoreboard
+PHOTON_TOKEN=os.environ.get("PHOTON_TOKEN")
+PHOTON_ID=os.environ.get("PHOTON_ID")
+PHOTON_BASE_URL = "https://api.spark.io/v1/devices/{0}/".format(PHOTON_ID)
 
 class SampleListener(Leap.Listener):
     def getMove(self, controller):
@@ -263,7 +274,9 @@ def get_fresh_model():
             'win': 0,
             'loss': 0,
             'tie': 0,
-            'games': 0
+            'games': 0,
+            'gameWin': 0,
+            'gameLoss': 0
         },
         'nn': []
     }
@@ -333,6 +346,14 @@ if LOAD_FRESH:
 else:
     try:
         M = cPickle.load(open(PICKLE_FILE, 'rb'))
+
+        # doing this retroactively, don't want to lose history
+        if not 'gameWin' in M['record']:
+            M['record']['gameWin'] = 0
+
+        if not 'gameLoss' in M['record']:
+            M['record']['gameLoss'] = 0
+
     except:
         print('Could not load pickled model. Starting fresh.')
         logging.info('Could not load pickled model. Starting fresh.')
@@ -595,10 +616,26 @@ def main():
 
                     # flash winner
                     if game['loss'] >= ROUNDS_TO_WIN:
+                        M['record']['gameLoss'] += 1
+
                         bot_write('playerVictory')
 
+                        # update human score on scoreboard
+                        requests.post(PHOTON_BASE_URL + "updateHuman", data = {
+                            "access_token": PHOTON_TOKEN,
+                            "arg": M['record']['gameLoss']
+                        })
+
                     if game['win'] >= ROUNDS_TO_WIN:
+                        M['record']['gameWin'] += 1
+
                         bot_write('botVictory')
+
+                        # update bot score on scoreboard
+                        requests.post(PHOTON_BASE_URL + "updateBot", data = {
+                            "access_token": PHOTON_TOKEN,
+                            "arg": M['record']['gameWin']
+                        })
 
                     break
 
