@@ -347,13 +347,6 @@ else:
     try:
         M = cPickle.load(open(PICKLE_FILE, 'rb'))
 
-        # doing this retroactively, don't want to lose history
-        if not 'gameWin' in M['record']:
-            M['record']['gameWin'] = 0
-
-        if not 'gameLoss' in M['record']:
-            M['record']['gameLoss'] = 0
-
     except:
         print('Could not load pickled model. Starting fresh.')
         logging.info('Could not load pickled model. Starting fresh.')
