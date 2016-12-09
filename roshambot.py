@@ -40,7 +40,7 @@ MEMORY = 5
 ROUNDS_TO_WIN = 3
 TIME_BETWEEN_MOVES = 2
 TIMEOUT_LENGTH = 1000
-SLEEP_DELTA = 60 * 10 # wait 10 minutes before sleeping
+SLEEP_DELTA = 60 * 30 # wait 30 minutes before sleeping
 
 CHOICES = ['r', 'p', 's']
 BEATS = {'r': 'p', 'p': 's', 's': 'r'}
@@ -614,10 +614,13 @@ def main():
                         bot_write('playerVictory')
 
                         # update human score on scoreboard
-                        requests.post(PHOTON_BASE_URL + "updateHuman", data = {
-                            "access_token": PHOTON_TOKEN,
-                            "arg": M['record']['gameLoss']
-                        })
+                        try:
+                            requests.post(PHOTON_BASE_URL + "updateHuman", data = {
+                                "access_token": PHOTON_TOKEN,
+                                "arg": M['record']['gameLoss']
+                            })
+                        except:
+                            print('Error posting to scoreboard')
 
                     if game['win'] >= ROUNDS_TO_WIN:
                         M['record']['gameWin'] += 1
@@ -625,10 +628,13 @@ def main():
                         bot_write('botVictory')
 
                         # update bot score on scoreboard
-                        requests.post(PHOTON_BASE_URL + "updateBot", data = {
-                            "access_token": PHOTON_TOKEN,
-                            "arg": M['record']['gameWin']
-                        })
+                        try:
+                            requests.post(PHOTON_BASE_URL + "updateBot", data = {
+                                "access_token": PHOTON_TOKEN,
+                                "arg": M['record']['gameWin']
+                            })
+                        except:
+                            print('Error posting to scoreboard')
 
                     break
 
